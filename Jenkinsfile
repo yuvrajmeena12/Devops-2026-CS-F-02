@@ -17,10 +17,23 @@ pipeline {
 
     post {
         success {
-            echo 'Build successful!'
+            script {
+                publishChecks(
+                    name: 'Jenkins CI',
+                    title: 'Build Successful',
+                    summary: 'Frontend build completed successfully'
+                )
+            }
         }
+
         failure {
-            echo 'Build failed!'
+            script {
+                publishChecks(
+                    name: 'Jenkins CI',
+                    title: 'Build Failed',
+                    summary: 'Frontend build failed'
+                )
+            }
         }
     }
 }
