@@ -118,7 +118,7 @@ export default function MySkills() {
         <textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Anything helpful for a potential match to know" />
 
         {type === 'teach' && (
-          <
+          <>
             <label>
               Upload a certificate (optional)
               <span style={{ color: 'var(--teal)', marginLeft: 6, fontWeight: 600 }}>✓ adds a Verified badge</span>
