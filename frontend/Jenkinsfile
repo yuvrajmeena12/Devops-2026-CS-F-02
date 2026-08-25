@@ -2,38 +2,50 @@ pipeline {
     agent any
 
     stages {
-        stage('Install Dependencies') {
+        stage('Install Frontend Dependencies') {
             steps {
-                bat 'npm install'
+                dir('frontend') {
+                    bat 'npm install'
+                }
             }
         }
 
         stage('Build Frontend') {
             steps {
-                bat 'npm run build'
+                dir('frontend') {
+                    bat 'npm run build'
+                }
             }
         }
     }
 
     post {
         success {
-            script {
-                publishChecks(
-                    name: 'Jenkins CI',
-                    title: 'Build Successful',
-                    summary: 'Frontend build completed successfully'
-                )
-            }
+            bat '''
+                if not exist "C:\\JenkinsFeedback" mkdir "C:\\JenkinsFeedback"
+
+                echo.>> "C:\\JenkinsFeedback\\build-feedback.txt"
+                echo ================================================ >> "C:\\JenkinsFeedback\\build-feedback.txt"
+                echo Build Number: %BUILD_NUMBER% >> "C:\\JenkinsFeedback\\build-feedback.txt"
+                echo Build Status: SUCCESS >> "C:\\JenkinsFeedback\\build-feedback.txt"
+                echo Project: SkillSwap >> "C:\\JenkinsFeedback\\build-feedback.txt"
+                echo Job Name: %JOB_NAME% >> "C:\\JenkinsFeedback\\build-feedback.txt"
+                echo ================================================ >> "C:\\JenkinsFeedback\\build-feedback.txt"
+            '''
         }
 
         failure {
-            script {
-                publishChecks(
-                    name: 'Jenkins CI',
-                    title: 'Build Failed',
-                    summary: 'Frontend build failed'
-                )
-            }
+            bat '''
+                if not exist "C:\\JenkinsFeedback" mkdir "C:\\JenkinsFeedback"
+
+                echo.>> "C:\\JenkinsFeedback\\build-feedback.txt"
+                echo ================================================ >> "C:\\JenkinsFeedback\\build-feedback.txt"
+                echo Build Number: %BUILD_NUMBER% >> "C:\\JenkinsFeedback\\build-feedback.txt"
+                echo Build Status: FAILURE >> "C:\\JenkinsFeedback\\build-feedback.txt"
+                echo Project: SkillSwap >> "C:\\JenkinsFeedback\\build-feedback.txt"
+                echo Job Name: %JOB_NAME% >> "C:\\JenkinsFeedback\\build-feedback.txt"
+                echo ================================================ >> "C:\\JenkinsFeedback\\build-feedback.txt"
+            '''
         }
     }
 }
