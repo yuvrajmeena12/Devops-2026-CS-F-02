@@ -6,7 +6,7 @@ import SkillAutocomplete from '../components/SkillAutocomplete';
 const CATEGORIES = ['Tech', 'Music', 'Language', 'Fitness', 'Art', 'Cooking', 'Academic', 'Other'];
 const LEVELS = ['Beginner', 'Intermediate', 'Expert'];
 const MODES = ['online', 'in-person', 'both'];
-const CATEGORY_ICON = { Tech: '\u{1F4BB}', Music: '\u{1F3B8}', Language: '\u{1F5E3}\uFE0F', Fitness: '\u{1F3CB}\uFE0F', Art: '\u{1F3A8}', Cooking: '\u{1F373}', Academic: '\u{1F4DA}', Other: '\u2728' };
+const CATEGORY_ICON = { Tech: '💻', Music: '🎸', Language: '🗣️', Fitness: '🏋️', Art: '🎨', Cooking: '🍳', Academic: '📚', Other: '✨' };
 
 function VerifiedBadge() {
   return (
@@ -148,8 +148,8 @@ export default function MySkills() {
       <div className="ticket-divider" />
       <div className="ticket-row">
         {showCert && skill.isVerified ? (
-          <button className="btn btn-sm btn-outline" onClick={() => viewCertificate(skill._id)}>View Certificate</button>
-        ) : <span></span>}
+        <button className="btn btn-sm btn-outline" onClick={() => viewCertificate(skill._id)} style={{ color: "black", borderColor: "black" }}>View Certificate </button>
+         ) : <span></span>}
         <button className="btn btn-sm btn-danger" onClick={() => handleDelete(skill._id)}>Remove</button>
       </div>
     </div>
@@ -181,7 +181,7 @@ export default function MySkills() {
           {showForm === 'teach' && renderForm('teach')}
           {teach.length === 0 && showForm !== 'teach' && (
             <div className="empty-state">
-              <div className="icon">{'\u{1F393}'}</div>
+              <div className="icon">{'🎓'}</div>
               <p style={{ fontSize: 13 }}>Add a skill you're comfortable teaching.</p>
             </div>
           )}
@@ -198,7 +198,7 @@ export default function MySkills() {
           {showForm === 'want' && renderForm('want')}
           {want.length === 0 && showForm !== 'want' && (
             <div className="empty-state">
-              <div className="icon">{'\u{1F50D}'}</div>
+              <div className="icon">{'🔍'}</div>
               <p style={{ fontSize: 13 }}>Add a skill you'd like someone to teach you.</p>
             </div>
           )}

@@ -34,7 +34,7 @@ export default function SkillCard({ skill, actions }) {
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           {skill.isVerified && (
-            <button className="btn btn-sm btn-outline" onClick={viewCertificate}>View Certificate</button>
+            <button className="btn btn-sm btn-outline" onClick={viewCertificate}  >View Certificate</button>
           )}
           {actions}
         </div>

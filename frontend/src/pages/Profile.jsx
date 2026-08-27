@@ -50,7 +50,7 @@ export default function Profile() {
     return (
       <div className="container">
         <div className="empty-state fade-in">
-          <div className="icon">\u26A0\uFE0F</div>
+          <div className="icon">⚠️</div>
           <p>{error || 'This profile could not be found.'}</p>
         </div>
       </div>
@@ -73,30 +73,70 @@ export default function Profile() {
 
   return (
     <div className="container">
-      <div className="card fade-in-up" style={{ display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
-        <div style={{
-          width: 72, height: 72, borderRadius: '50%', flexShrink: 0, overflow: 'hidden',
-          background: 'var(--teal)', color: 'var(--ink)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 26,
-        }}>
-          {profileUser.profilePicUrl ? (
-            <img src={profileUser.profilePicUrl} alt={profileUser.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          ) : (
-            profileUser.name?.charAt(0).toUpperCase()
+      <div
+        className="fade-in-up"
+        style={{
+          borderRadius: 'var(--radius)', overflow: 'hidden', marginBottom: 16,
+          background: 'linear-gradient(135deg, var(--ink-raised) 0%, #24392E 100%)',
+        }}
+      >
+        <div style={{ height: 64, background: 'linear-gradient(90deg, var(--amber) 0%, var(--teal) 100%)' }} />
+        <div style={{ padding: '0 24px 24px', marginTop: -40, display: 'flex', alignItems: 'flex-end', gap: 18, flexWrap: 'wrap' }}>
+          <div style={{
+            width: 92, height: 92, borderRadius: '50%', flexShrink: 0, overflow: 'hidden',
+            background: 'var(--teal)', color: 'var(--ink)', border: '4px solid var(--ink-raised)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 32,
+            boxShadow: '0 6px 18px rgba(0,0,0,0.35)',
+          }}>
+            {profileUser.profilePicUrl ? (
+              <img src={profileUser.profilePicUrl} alt={profileUser.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              profileUser.name?.charAt(0).toUpperCase()
+            )}
+          </div>
+
+          <div style={{ flex: 1, minWidth: 200, paddingBottom: 4 }}>
+            <h2 style={{ marginBottom: 2 }}>{profileUser.name}</h2>
+            <p style={{ color: 'var(--ink-muted)', fontSize: 13 }}>{profileUser.location || 'Location not set'}</p>
+          </div>
+
+          {isOwnProfile && (
+            <Link to="/manage-profile" className="btn btn-sm btn-outline" style={{ marginBottom: 4 }}>Edit Profile</Link>
           )}
         </div>
-        <div style={{ flex: 1, minWidth: 200 }}>
-          <h2 style={{ marginBottom: 2 }}>{profileUser.name}</h2>
-          <p style={{ color: 'var(--ink-muted)', fontSize: 13 }}>{profileUser.location || 'Location not set'}</p>
-          <p style={{ marginTop: 6, fontSize: 13 }}>
-            {profileUser.trustScore ? `\u2605 ${profileUser.trustScore}` : 'No ratings yet'}
-            {' \u00B7 '}{profileUser.completedSwapsCount || 0} completed swap{profileUser.completedSwapsCount === 1 ? '' : 's'}
-          </p>
-          {profileUser.bio && <p style={{ marginTop: 8, fontSize: 14 }}>{profileUser.bio}</p>}
+
+        <div style={{ padding: '0 24px 20px' }}>
+          {profileUser.bio && <p style={{ fontSize: 14, marginBottom: 14, lineHeight: 1.5 }}>{profileUser.bio}</p>}
+
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: (profileUser.linkedinUrl || profileUser.instagramUrl || profileUser.websiteUrl) ? 14 : 0 }}>
+            <span className="badge badge-accepted">
+              ★ {profileUser.trustScore ? profileUser.trustScore : 'No ratings yet'}
+            </span>
+            <span className="badge badge-pending">
+              {profileUser.completedSwapsCount || 0} completed swap{profileUser.completedSwapsCount === 1 ? '' : 's'}
+            </span>
+          </div>
+
+          {(profileUser.linkedinUrl || profileUser.instagramUrl || profileUser.websiteUrl) && (
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              {profileUser.linkedinUrl && (
+                <a href={profileUser.linkedinUrl} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline">
+                  💼 LinkedIn
+                </a>
+              )}
+              {profileUser.instagramUrl && (
+                <a href={profileUser.instagramUrl} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline">
+                  📷 Instagram
+                </a>
+              )}
+              {profileUser.websiteUrl && (
+                <a href={profileUser.websiteUrl} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline">
+                  🌐 Website
+                </a>
+              )}
+            </div>
+          )}
         </div>
-        {isOwnProfile && (
-          <Link to="/manage-profile" className="btn btn-sm btn-outline">Edit Profile</Link>
-        )}
       </div>
 
       <div className="two-col">
@@ -113,16 +153,16 @@ export default function Profile() {
                 {s.title}
                 {s.isVerified && (
                   <span style={{ fontSize: 10, fontWeight: 700, background: 'var(--teal)', color: 'var(--paper)', padding: '2px 8px', borderRadius: 10 }}>
-                    \u2713 VERIFIED
+                    ✓ VERIFIED
                   </span>
                 )}
               </div>
-              <div className="ticket-meta">{s.category} \u00B7 {s.level}</div>
+              <div className="ticket-meta">{s.category} · {s.level}</div>
               <div className="ticket-divider" />
               <div className="ticket-row">
                 {s.isVerified ? (
-                  <button className="btn btn-sm btn-outline" onClick={() => viewCertificate(s._id)}>View Certificate</button>
-                ) : <span></span>}
+                   <button className="btn btn-sm btn-outline" onClick={() => viewCertificate(skill._id)} style={{ color: "black", borderColor: "black" }}>View Certificate </button>
+                    ) : <span></span>}
                 {!isOwnProfile && (
                   <button className="btn btn-sm" onClick={() => setSwapSkill(s)}>Request Swap</button>
                 )}
@@ -141,7 +181,7 @@ export default function Profile() {
           {want.map((s, i) => (
             <div key={s._id} className="ticket stagger-item" style={{ '--stagger-index': i }}>
               <div className="ticket-title" style={{ fontSize: 15 }}>{s.title}</div>
-              <div className="ticket-meta">{s.category} \u00B7 {s.level}</div>
+              <div className="ticket-meta">{s.category} · {s.level}</div>
             </div>
           ))}
         </div>
@@ -154,7 +194,7 @@ export default function Profile() {
           <div key={r._id} className="stagger-item" style={{ '--stagger-index': i, marginBottom: 12, borderBottom: '1px solid rgba(237,232,216,0.08)', paddingBottom: 10 }}>
             <StarRating value={r.rating} readOnly />
             {r.comment && <p style={{ fontSize: 13, marginTop: 4 }}>{r.comment}</p>}
-            <p style={{ fontSize: 11, color: 'var(--ink-muted)', marginTop: 4 }}>\u2014 {r.reviewer?.name || 'Anonymous'}</p>
+            <p style={{ fontSize: 11, color: 'var(--ink-muted)', marginTop: 4 }}>— {r.reviewer?.name || 'Anonymous'}</p>
           </div>
         ))}
       </div>

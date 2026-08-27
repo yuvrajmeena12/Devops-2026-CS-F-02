@@ -56,7 +56,7 @@ export default function ForgotPassword() {
               <div className="card" style={{ borderLeft: '3px solid var(--amber)', marginTop: 14 }}>
                 <p style={{ fontSize: 12.5, color: 'var(--ink-muted)', marginBottom: 8 }}>
                   Email sending isn't configured on this deployment yet, so here's your reset link directly
-                  (this box only appears because no email service is set up \u2014 remove this in production):
+                  (this box only appears because no email service is set up — remove this in production):
                 </p>
                 <Link to={devLink.replace(window.location.origin, '')} style={{ fontSize: 13, color: 'var(--amber)', wordBreak: 'break-all' }}>
                   {devLink}

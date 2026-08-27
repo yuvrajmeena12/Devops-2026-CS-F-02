@@ -11,6 +11,9 @@ export default function ManageProfile() {
     name: user?.name || '',
     bio: user?.bio || '',
     location: user?.location || '',
+    linkedinUrl: user?.linkedinUrl || '',
+    instagramUrl: user?.instagramUrl || '',
+    websiteUrl: user?.websiteUrl || '',
   });
   const [preview, setPreview] = useState(user?.profilePicUrl || '');
   const [selectedFile, setSelectedFile] = useState(null);
@@ -122,7 +125,7 @@ export default function ManageProfile() {
                 Remove
               </button>
             )}
-            <p style={{ fontSize: 11, color: 'var(--ink-muted)', marginTop: 6 }}>PNG, JPG, or WEBP \u00B7 up to 2MB</p>
+            <p style={{ fontSize: 11, color: 'var(--ink-muted)', marginTop: 6 }}>PNG, JPG, or WEBP · up to 2MB</p>
           </div>
         </div>
 
@@ -133,6 +136,28 @@ export default function ManageProfile() {
           <input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="e.g. Jodhpur" />
           <label>Bio</label>
           <textarea rows={4} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} placeholder="Tell others a bit about yourself" />
+
+          <div style={{ marginTop: 8, marginBottom: 4, paddingTop: 16, borderTop: '1px solid rgba(237,232,216,0.08)' }}>
+            <h4 style={{ fontSize: 14, color: 'var(--teal)', marginBottom: 4 }}>Links (optional)</h4>
+            <p style={{ fontSize: 12, color: 'var(--ink-muted)', marginBottom: 14 }}>
+              Help potential swap partners get to know you before you meet.
+            </p>
+          </div>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 15 }}>💼</span> LinkedIn
+          </label>
+          <input value={form.linkedinUrl} onChange={(e) => setForm({ ...form, linkedinUrl: e.target.value })} placeholder="linkedin.com/in/yourname" />
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 15 }}>📷</span> Instagram
+          </label>
+          <input value={form.instagramUrl} onChange={(e) => setForm({ ...form, instagramUrl: e.target.value })} placeholder="instagram.com/yourname" />
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 15 }}>🌐</span> Website / Portfolio
+          </label>
+          <input value={form.websiteUrl} onChange={(e) => setForm({ ...form, websiteUrl: e.target.value })} placeholder="yourwebsite.com" />
 
           <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
             <button className="btn" disabled={saving}>{saving ? 'Saving...' : 'Save Changes'}</button>

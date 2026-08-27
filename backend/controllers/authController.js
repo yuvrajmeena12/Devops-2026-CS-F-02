@@ -49,14 +49,28 @@ const login = async (req, res) => {
 
 const getMe = async (req, res) => res.json(req.user);
 
+// Adds "https://" automatically if someone types a link without a protocol
+// (e.g. "linkedin.com/in/x" -> "https://linkedin.com/in/x") — small thing,
+// but avoids broken links from a common, easy-to-make mistake.
+const normalizeUrl = (url) => {
+  if (!url) return '';
+  const trimmed = url.trim();
+  if (!trimmed) return '';
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+};
+
 const updateProfile = async (req, res) => {
   try {
-    const { name, bio, location, profilePicUrl } = req.body;
+    const { name, bio, location, profilePicUrl, linkedinUrl, instagramUrl, websiteUrl } = req.body;
     const user = await User.findById(req.user._id);
     if (name) user.name = name;
     if (bio !== undefined) user.bio = bio;
     if (location !== undefined) user.location = location;
     if (profilePicUrl !== undefined) user.profilePicUrl = profilePicUrl;
+    if (linkedinUrl !== undefined) user.linkedinUrl = normalizeUrl(linkedinUrl);
+    if (instagramUrl !== undefined) user.instagramUrl = normalizeUrl(instagramUrl);
+    if (websiteUrl !== undefined) user.websiteUrl = normalizeUrl(websiteUrl);
     await user.save();
     res.json(user);
   } catch (error) {

@@ -9,6 +9,12 @@ const userSchema = new mongoose.Schema(
     bio: { type: String, default: '' },
     location: { type: String, default: '' },
     profilePicUrl: { type: String, default: '' },
+    // Optional links shown on the public profile so a potential swap
+    // partner can look someone up before agreeing to meet — genuinely
+    // useful for trust, on top of the in-app rating system.
+    linkedinUrl: { type: String, default: '' },
+    instagramUrl: { type: String, default: '' },
+    websiteUrl: { type: String, default: '' },
     trustScore: { type: Number, default: 0 },
     completedSwapsCount: { type: Number, default: 0 },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
