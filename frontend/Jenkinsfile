@@ -2,24 +2,47 @@ pipeline {
     agent any
 
     stages {
-        stage('Install Frontend Dependencies') {
+
+        stage('Checkout') {
             steps {
-                dir('frontend') {
-                    bat 'npm install'
-                }
+                checkout scm
             }
         }
 
-        stage('Build Frontend') {
+        stage('Docker Check') {
             steps {
-                dir('frontend') {
-                    bat 'npm run build'
-                }
+                bat 'docker --version'
+                bat 'docker compose version'
+            }
+        }
+
+        stage('Build Docker Images') {
+            steps {
+                bat 'docker compose build'
+            }
+        }
+
+        stage('Start SkillSwap') {
+            steps {
+                bat 'docker compose up -d'
+            }
+        }
+
+        stage('Check Containers') {
+            steps {
+                bat 'docker compose ps'
+            }
+        }
+
+        stage('Backend Health Check') {
+            steps {
+                bat 'curl http://localhost:5000/api/health'
             }
         }
     }
 
     post {
+
         success {
             bat '''
                 if not exist "C:\\JenkinsFeedback" mkdir "C:\\JenkinsFeedback"
@@ -30,6 +53,7 @@ pipeline {
                 echo Build Status: SUCCESS >> "C:\\JenkinsFeedback\\build-feedback.txt"
                 echo Project: SkillSwap >> "C:\\JenkinsFeedback\\build-feedback.txt"
                 echo Job Name: %JOB_NAME% >> "C:\\JenkinsFeedback\\build-feedback.txt"
+                echo Docker Deployment: SUCCESS >> "C:\\JenkinsFeedback\\build-feedback.txt"
                 echo ================================================ >> "C:\\JenkinsFeedback\\build-feedback.txt"
             '''
         }
@@ -44,8 +68,13 @@ pipeline {
                 echo Build Status: FAILURE >> "C:\\JenkinsFeedback\\build-feedback.txt"
                 echo Project: SkillSwap >> "C:\\JenkinsFeedback\\build-feedback.txt"
                 echo Job Name: %JOB_NAME% >> "C:\\JenkinsFeedback\\build-feedback.txt"
+                echo Docker Deployment: FAILED >> "C:\\JenkinsFeedback\\build-feedback.txt"
                 echo ================================================ >> "C:\\JenkinsFeedback\\build-feedback.txt"
             '''
+        }
+
+        always {
+            bat 'docker compose ps'
         }
     }
 }
