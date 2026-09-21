@@ -73,21 +73,10 @@ export default function Profile() {
 
   return (
     <div className="container">
-      <div
-        className="fade-in-up"
-        style={{
-          borderRadius: 'var(--radius)', overflow: 'hidden', marginBottom: 16,
-          background: 'linear-gradient(135deg, var(--ink-raised) 0%, #24392E 100%)',
-        }}
-      >
-        <div style={{ height: 64, background: 'linear-gradient(90deg, var(--amber) 0%, var(--teal) 100%)' }} />
-        <div style={{ padding: '0 24px 24px', marginTop: -40, display: 'flex', alignItems: 'flex-end', gap: 18, flexWrap: 'wrap' }}>
-          <div style={{
-            width: 92, height: 92, borderRadius: '50%', flexShrink: 0, overflow: 'hidden',
-            background: 'var(--teal)', color: 'var(--ink)', border: '4px solid var(--ink-raised)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 32,
-            boxShadow: '0 6px 18px rgba(0,0,0,0.35)',
-          }}>
+      <section className="profile-hero fade-in-up">
+        <div className="profile-cover" />
+        <div className="profile-summary">
+          <div className="profile-avatar">
             {profileUser.profilePicUrl ? (
               <img src={profileUser.profilePicUrl} alt={profileUser.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
@@ -95,20 +84,20 @@ export default function Profile() {
             )}
           </div>
 
-          <div style={{ flex: 1, minWidth: 200, paddingBottom: 4 }}>
-            <h2 style={{ marginBottom: 2 }}>{profileUser.name}</h2>
-            <p style={{ color: 'var(--ink-muted)', fontSize: 13 }}>{profileUser.location || 'Location not set'}</p>
+          <div className="profile-title">
+            <h1>{profileUser.name}</h1>
+            <p>{profileUser.location || 'Location not set'}</p>
           </div>
 
           {isOwnProfile && (
-            <Link to="/manage-profile" className="btn btn-sm btn-outline" style={{ marginBottom: 4 }}>Edit Profile</Link>
+            <Link to="/manage-profile" className="btn btn-sm btn-outline">Edit Profile</Link>
           )}
         </div>
 
-        <div style={{ padding: '0 24px 20px' }}>
-          {profileUser.bio && <p style={{ fontSize: 14, marginBottom: 14, lineHeight: 1.5 }}>{profileUser.bio}</p>}
+        <div className="profile-details">
+          {profileUser.bio && <p className="profile-bio">{profileUser.bio}</p>}
 
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: (profileUser.linkedinUrl || profileUser.instagramUrl || profileUser.websiteUrl) ? 14 : 0 }}>
+          <div className="profile-stats">
             <span className="badge badge-accepted">
               ★ {profileUser.trustScore ? profileUser.trustScore : 'No ratings yet'}
             </span>
@@ -118,7 +107,7 @@ export default function Profile() {
           </div>
 
           {(profileUser.linkedinUrl || profileUser.instagramUrl || profileUser.websiteUrl) && (
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <div className="profile-links">
               {profileUser.linkedinUrl && (
                 <a href={profileUser.linkedinUrl} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline">
                   💼 LinkedIn
@@ -137,7 +126,7 @@ export default function Profile() {
             </div>
           )}
         </div>
-      </div>
+      </section>
 
       <div className="two-col">
         <div>
@@ -161,7 +150,7 @@ export default function Profile() {
               <div className="ticket-divider" />
               <div className="ticket-row">
                 {s.isVerified ? (
-                   <button className="btn btn-sm btn-outline" onClick={() => viewCertificate(skill._id)} style={{ color: "black", borderColor: "black" }}>View Certificate </button>
+                   <button className="btn btn-sm btn-outline ticket-action" onClick={() => viewCertificate(s._id)}>View Certificate</button>
                     ) : <span></span>}
                 {!isOwnProfile && (
                   <button className="btn btn-sm" onClick={() => setSwapSkill(s)}>Request Swap</button>

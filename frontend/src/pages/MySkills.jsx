@@ -164,6 +164,7 @@ export default function MySkills() {
 
       <div className="card" style={{ borderLeft: '3px solid var(--amber)', marginBottom: 24 }}>
         <p style={{ fontSize: 13.5, lineHeight: 1.6 }}>
+          
           <strong style={{ color: 'var(--teal)' }}>Left list</strong> = what you can teach someone else.{' '}
           <strong style={{ color: 'var(--amber)' }}>Right list</strong> = what you want someone to teach you.{' '}
           We compare your "want" list against everyone else\u2019s "teach" list (and vice versa) to suggest matches.

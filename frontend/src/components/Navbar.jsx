@@ -39,11 +39,11 @@ export default function Navbar() {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="navbar">
+    <header className="navbar">
       <Link to="/" className="nav-logo"><span className="mark">⇄</span> SkillSwap</Link>
 
       {user ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div className="nav-controls">
           <div className="nav-links">
             <Link to="/dashboard" className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}>Dashboard</Link>
             <Link to="/explore" className={`nav-link ${isActive('/explore') ? 'active' : ''}`}>Explore</Link>
@@ -76,11 +76,11 @@ export default function Navbar() {
           </div>
         </div>
       ) : (
-        <div className="nav-links">
+        <div className="nav-links guest-nav">
           <Link to="/login" className="nav-link">Log in</Link>
           <Link to="/register" className="btn btn-sm">Get started</Link>
         </div>
       )}
-    </div>
+    </header>
   );
 }

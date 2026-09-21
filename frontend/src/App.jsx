@@ -25,6 +25,7 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Navbar />
+        <main className="app-main">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
@@ -43,6 +44,7 @@ function App() {
           <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
         </Routes>
+        </main>
       </AuthProvider>
     </BrowserRouter>
   );
