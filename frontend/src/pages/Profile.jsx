@@ -137,7 +137,7 @@ export default function Profile() {
             </div>
           )}
           {teach.map((s, i) => (
-            <div key={s._id} className="ticket stagger-item" style={{ '--stagger-index': i }}>
+            <div key={s._id} className="ticket skill-ticket stagger-item" style={{ '--stagger-index': i }}>
               <div className="ticket-title" style={{ fontSize: 15, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 {s.title}
                 {s.isVerified && (
@@ -150,8 +150,8 @@ export default function Profile() {
               <div className="ticket-divider" />
               <div className="ticket-row">
                 {s.isVerified ? (
-                   <button className="btn btn-sm btn-outline ticket-action" onClick={() => viewCertificate(s._id)}>View Certificate</button>
-                    ) : <span></span>}
+                  <button className="btn btn-sm btn-outline ticket-action" onClick={() => viewCertificate(s._id)}>View Certificate</button>
+                ) : <span></span>}
                 {!isOwnProfile && (
                   <button className="btn btn-sm" onClick={() => setSwapSkill(s)}>Request Swap</button>
                 )}
@@ -168,7 +168,7 @@ export default function Profile() {
             </div>
           )}
           {want.map((s, i) => (
-            <div key={s._id} className="ticket stagger-item" style={{ '--stagger-index': i }}>
+            <div key={s._id} className="ticket skill-ticket stagger-item" style={{ '--stagger-index': i }}>
               <div className="ticket-title" style={{ fontSize: 15 }}>{s.title}</div>
               <div className="ticket-meta">{s.category} · {s.level}</div>
             </div>
