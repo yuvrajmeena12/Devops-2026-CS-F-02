@@ -11,32 +11,47 @@ pipeline {
 
         stage('Docker Check') {
             steps {
-                bat 'docker --version'
-                bat 'docker compose version'
+                bat '''
+                    set "PATH=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;%PATH%"
+                    docker --version
+                    docker compose version
+                '''
             }
         }
 
         stage('Build Docker Images') {
             steps {
-                bat 'docker compose build'
+                bat '''
+                    set "PATH=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;%PATH%"
+                    docker compose build
+                '''
             }
         }
 
         stage('Start SkillSwap') {
             steps {
-                bat 'docker compose up -d'
+                bat '''
+                    set "PATH=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;%PATH%"
+                    docker compose up -d
+                '''
             }
         }
 
         stage('Check Containers') {
             steps {
-                bat 'docker compose ps'
+                bat '''
+                    set "PATH=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;%PATH%"
+                    docker compose ps
+                '''
             }
         }
 
         stage('Backend Health Check') {
             steps {
-                bat 'curl http://localhost:5000/api/health'
+                bat '''
+                    set "PATH=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;%PATH%"
+                    curl http://localhost:5000/api/health
+                '''
             }
         }
     }
@@ -74,7 +89,10 @@ pipeline {
         }
 
         always {
-            bat 'docker compose ps'
+            bat '''
+                set "PATH=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;%PATH%"
+                docker compose ps
+            '''
         }
     }
 }
