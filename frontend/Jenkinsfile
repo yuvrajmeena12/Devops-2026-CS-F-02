@@ -3,45 +3,49 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
         stage('Docker Check') {
             steps {
                 bat '''
-                    set "PATH=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;%PATH%"
-                    docker --version
-                    docker compose version
+                    set "DOCKER_BIN=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin"
+                    "%DOCKER_BIN%\\docker.exe" --version
+                    "%DOCKER_BIN%\\docker-compose.exe" version
                 '''
             }
         }
 
         stage('Build Docker Images') {
             steps {
-                bat '''
-                    set "PATH=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;%PATH%"
-                    docker compose build
-                '''
+                withCredentials([string(credentialsId: 'skillswap-jwt-secret', variable: 'JWT_SECRET')]) {
+                    bat '''
+                        set "DOCKER_BIN=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin"
+                        set "PATH=%DOCKER_BIN%;%PATH%"
+
+                        docker-compose.exe build
+                    '''
+                }
             }
         }
 
         stage('Start SkillSwap') {
             steps {
-                bat '''
-                    set "PATH=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;%PATH%"
-                    docker compose up -d
-                '''
+                withCredentials([string(credentialsId: 'skillswap-jwt-secret', variable: 'JWT_SECRET')]) {
+                    bat '''
+                        set "DOCKER_BIN=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin"
+                        set "PATH=%DOCKER_BIN%;%PATH%"
+
+                        docker-compose.exe up -d
+                    '''
+                }
             }
         }
 
         stage('Check Containers') {
             steps {
                 bat '''
-                    set "PATH=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;%PATH%"
-                    docker compose ps
+                    set "DOCKER_BIN=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin"
+                    set "PATH=%DOCKER_BIN%;%PATH%"
+
+                    docker-compose.exe ps
                 '''
             }
         }
@@ -49,15 +53,13 @@ pipeline {
         stage('Backend Health Check') {
             steps {
                 bat '''
-                    set "PATH=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;%PATH%"
-                    curl http://localhost:5000/api/health
+                    curl.exe http://localhost:5000/api/health
                 '''
             }
         }
     }
 
     post {
-
         success {
             bat '''
                 if not exist "C:\\JenkinsFeedback" mkdir "C:\\JenkinsFeedback"
@@ -90,8 +92,10 @@ pipeline {
 
         always {
             bat '''
-                set "PATH=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;%PATH%"
-                docker compose ps
+                set "DOCKER_BIN=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin"
+                set "PATH=%DOCKER_BIN%;%PATH%"
+
+                docker-compose.exe ps
             '''
         }
     }
