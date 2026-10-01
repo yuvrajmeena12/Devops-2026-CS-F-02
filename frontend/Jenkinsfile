@@ -3,63 +3,46 @@ pipeline {
 
     stages {
 
-        stage('Docker Check') {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Install Dependencies') {
             steps {
                 bat '''
-                    set "DOCKER_BIN=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin"
-                    "%DOCKER_BIN%\\docker.exe" --version
-                    "%DOCKER_BIN%\\docker-compose.exe" version
+                    cd frontend
+                    npm install
+
+                    cd ..\\backend
+                    npm install
                 '''
             }
         }
 
-        stage('Build Docker Images') {
-            steps {
-                withCredentials([string(credentialsId: 'skillswap-jwt-secret', variable: 'JWT_SECRET')]) {
-                    bat '''
-                        set "DOCKER_BIN=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin"
-                        set "PATH=%DOCKER_BIN%;%PATH%"
-
-                        docker-compose.exe build
-                    '''
-                }
-            }
-        }
-
-        stage('Start SkillSwap') {
-            steps {
-                withCredentials([string(credentialsId: 'skillswap-jwt-secret', variable: 'JWT_SECRET')]) {
-                    bat '''
-                        set "DOCKER_BIN=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin"
-                        set "PATH=%DOCKER_BIN%;%PATH%"
-
-                        docker-compose.exe up -d
-                    '''
-                }
-            }
-        }
-
-        stage('Check Containers') {
+        stage('Build Frontend') {
             steps {
                 bat '''
-                    set "DOCKER_BIN=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin"
-                    set "PATH=%DOCKER_BIN%;%PATH%"
-
-                    docker-compose.exe ps
+                    cd frontend
+                    npm run build
                 '''
             }
         }
 
-        stage('Backend Health Check') {
+        stage('Backend Check') {
             steps {
                 bat '''
-                    curl.exe http://localhost:5000/api/health
+                    cd backend
+                    node --version
+                    npm --version
                 '''
             }
         }
     }
 
     post {
+
         success {
             bat '''
                 if not exist "C:\\JenkinsFeedback" mkdir "C:\\JenkinsFeedback"
@@ -70,7 +53,7 @@ pipeline {
                 echo Build Status: SUCCESS >> "C:\\JenkinsFeedback\\build-feedback.txt"
                 echo Project: SkillSwap >> "C:\\JenkinsFeedback\\build-feedback.txt"
                 echo Job Name: %JOB_NAME% >> "C:\\JenkinsFeedback\\build-feedback.txt"
-                echo Docker Deployment: SUCCESS >> "C:\\JenkinsFeedback\\build-feedback.txt"
+                echo Jenkins Auto Trigger: SUCCESS >> "C:\\JenkinsFeedback\\build-feedback.txt"
                 echo ================================================ >> "C:\\JenkinsFeedback\\build-feedback.txt"
             '''
         }
@@ -85,17 +68,8 @@ pipeline {
                 echo Build Status: FAILURE >> "C:\\JenkinsFeedback\\build-feedback.txt"
                 echo Project: SkillSwap >> "C:\\JenkinsFeedback\\build-feedback.txt"
                 echo Job Name: %JOB_NAME% >> "C:\\JenkinsFeedback\\build-feedback.txt"
-                echo Docker Deployment: FAILED >> "C:\\JenkinsFeedback\\build-feedback.txt"
+                echo Jenkins Auto Trigger: FAILED >> "C:\\JenkinsFeedback\\build-feedback.txt"
                 echo ================================================ >> "C:\\JenkinsFeedback\\build-feedback.txt"
-            '''
-        }
-
-        always {
-            bat '''
-                set "DOCKER_BIN=C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin"
-                set "PATH=%DOCKER_BIN%;%PATH%"
-
-                docker-compose.exe ps
             '''
         }
     }

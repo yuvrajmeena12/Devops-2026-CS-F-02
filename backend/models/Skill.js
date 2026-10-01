@@ -2,28 +2,31 @@ const mongoose = require('mongoose');
 
 const skillSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    title: { type: String, required: true, trim: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    title: { type: String, required: true, trim: true, maxlength: 120 },
     category: {
       type: String,
       enum: ['Tech', 'Music', 'Language', 'Fitness', 'Art', 'Cooking', 'Academic', 'Other'],
       default: 'Other',
+      index: true,
     },
-    description: { type: String, default: '' },
+    description: { type: String, default: '', maxlength: 2000 },
     level: { type: String, enum: ['Beginner', 'Intermediate', 'Expert'], default: 'Beginner' },
-    type: { type: String, enum: ['teach', 'want'], required: true },
+    type: { type: String, enum: ['teach', 'want'], required: true, index: true },
     mode: { type: String, enum: ['online', 'in-person', 'both'], default: 'both' },
-    // Certificate verification — the actual uploaded file, stored as a
-    // base64 data string directly in MongoDB. We do this (rather than
-    // saving to the server's disk) because Render's free tier has an
-    // ephemeral filesystem — any file saved to disk is wiped on every
-    // restart/redeploy. Storing it in Atlas keeps it permanent for free.
-    certificateFile: { type: String, default: '' }, // base64 data URI
-    certificateFileName: { type: String, default: '' },
-    certificateFileType: { type: String, default: '' }, // e.g. 'application/pdf', 'image/png'
+    
+    // Proof / Certificate for individual skill (supporting documentation).
+    certificateFile: { type: String, default: '' },
+    certificateFileName: { type: String, default: '', maxlength: 255 },
+    certificateFileType: { type: String, default: '', maxlength: 100 },
+    hasProof: { type: Boolean, default: false, index: true },
     isVerified: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
+
+// Compound index for efficient browsing and search queries
+skillSchema.index({ type: 1, category: 1, createdAt: -1 });
+skillSchema.index({ title: 'text', description: 'text' });
 
 module.exports = mongoose.model('Skill', skillSchema);

@@ -1,0 +1,94 @@
+{
+   "checksum": "e66ac1da658a4ed63f3463db8a6ef9c2",
+   "roots": {
+      "bookmark_bar": {
+         "children": [ {
+            "date_added": "13435132081910713",
+            "date_last_used": "0",
+            "guid": "20d06e2f-48db-4e8e-8fed-19f938bb28d9",
+            "id": "10",
+            "name": "McAfee Security",
+            "show_icon": false,
+            "source": "oem_preload",
+            "type": "url",
+            "url": "https://js.redirect.hp.com/jumpstation?bd=McAfee&c=251&locale=ACJ&pf=1112&tp=edge",
+            "visit_count": 0
+         }, {
+            "date_added": "13435132081910512",
+            "date_last_used": "0",
+            "guid": "cf0c6f09-2596-4d70-98d7-4b9bbae1c355",
+            "id": "9",
+            "name": "Agoda",
+            "show_icon": false,
+            "source": "oem_preload",
+            "type": "url",
+            "url": "https://js.redirect.hp.com/jumpstation?bd=Agoda&c=251&locale=ACJ&pf=1112&tp=edge",
+            "visit_count": 0
+         }, {
+            "date_added": "13435132081910191",
+            "date_last_used": "0",
+            "guid": "ff21bafb-f092-4bfb-b96b-34e526dad25d",
+            "id": "8",
+            "name": "Adobe Apps",
+            "show_icon": false,
+            "source": "oem_preload",
+            "type": "url",
+            "url": "https://js.redirect.hp.com/jumpstation?bd=Adobe&c=251&locale=ACJ&pf=1112&tp=edge&RedeemCode=Sip5NFf5%2fvrWBPaJKhNdgSeGW9d1wKRrh2esQSbXs0JMlHYI2uP1ik6w1bXLKzAW%2b2pm32%2fsmo11KKc08f3V8MsjYwze5MgJwGmaRJfzF1B9K7fQRJKZ%2bcmJiY7BCXQh92KVshM%2fCwdc2qjhUvdz0rVXuLVXdXfn5ESOucpMMdw%3d",
+            "visit_count": 0
+         }, {
+            "date_added": "13435132081909572",
+            "date_last_used": "0",
+            "guid": "3d0aa83b-62a3-4960-81de-e486c0aff23f",
+            "id": "7",
+            "name": "Dropbox Offer",
+            "show_icon": false,
+            "source": "oem_preload",
+            "type": "url",
+            "url": "https://js.redirect.hp.com/jumpstation?bd=dropbox&c=251&locale=ACJ&pf=1112&tp=edge",
+            "visit_count": 0
+         } ],
+         "date_added": "13435132081545068",
+         "date_last_used": "0",
+         "date_modified": "13435132081910713",
+         "guid": "0bc5d13f-2cba-5d74-951f-3f233fe6c908",
+         "id": "1",
+         "name": "Favorites bar",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "other": {
+         "children": [  ],
+         "date_added": "13435132081545068",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "82b081ec-3dd3-529c-8475-ab6c344590dd",
+         "id": "2",
+         "name": "Other favorites",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "synced": {
+         "children": [  ],
+         "date_added": "13435132081545068",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "4cf2e351-0e85-532b-bb37-df045d8f8d0f",
+         "id": "3",
+         "name": "Mobile favorites",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "workspaces_v2": {
+         "children": [  ],
+         "date_added": "13435132081545068",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "75aa6670-344f-549d-b742-660f029506ab",
+         "id": "5",
+         "name": "Workspaces",
+         "source": "unknown",
+         "type": "folder"
+      }
+   },
+   "version": 1
+}

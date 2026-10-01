@@ -7,7 +7,7 @@ const createSwapRequest = async (req, res) => {
   try {
     const { toUser, offeredSkill, requestedSkill, message } = req.body;
     if (!toUser || !offeredSkill || !requestedSkill) {
-      return res.status(400).json({ message: 'toUser, offeredSkill and requestedSkill are required' });
+      return res.status(400).json({ message: 'toUser, offeredSkill, and requestedSkill are required' });
     }
     if (toUser === req.user._id.toString()) {
       return res.status(400).json({ message: 'You cannot send a swap request to yourself' });
@@ -18,8 +18,12 @@ const createSwapRequest = async (req, res) => {
       toUser,
       offeredSkill,
       requestedSkill,
-      message,
+      message: message || '',
+      status: 'pending',
     });
+
+    await swap.populate('fromUser toUser', 'name profilePicUrl isVerified trustScore rating');
+    await swap.populate('offeredSkill requestedSkill');
 
     await createNotification(
       toUser,
@@ -38,7 +42,7 @@ const createSwapRequest = async (req, res) => {
 const getIncoming = async (req, res) => {
   try {
     const swaps = await SwapRequest.find({ toUser: req.user._id })
-      .populate('fromUser', 'name profilePicUrl trustScore')
+      .populate('fromUser', 'name profilePicUrl isVerified trustScore rating')
       .populate('offeredSkill requestedSkill')
       .sort({ createdAt: -1 });
     res.json(swaps);
@@ -51,7 +55,7 @@ const getIncoming = async (req, res) => {
 const getSent = async (req, res) => {
   try {
     const swaps = await SwapRequest.find({ fromUser: req.user._id })
-      .populate('toUser', 'name profilePicUrl trustScore')
+      .populate('toUser', 'name profilePicUrl isVerified trustScore rating')
       .populate('offeredSkill requestedSkill')
       .sort({ createdAt: -1 });
     res.json(swaps);
@@ -60,14 +64,29 @@ const getSent = async (req, res) => {
   }
 };
 
-// GET /api/swaps/active  (accepted swaps involving the user)
+// GET /api/swaps/active
 const getActive = async (req, res) => {
   try {
     const swaps = await SwapRequest.find({
-      status: 'accepted',
+      status: { $in: ['accepted', 'scheduled', 'in_progress'] },
       $or: [{ fromUser: req.user._id }, { toUser: req.user._id }],
     })
-      .populate('fromUser toUser', 'name profilePicUrl trustScore')
+      .populate('fromUser toUser', 'name profilePicUrl isVerified trustScore rating')
+      .populate('offeredSkill requestedSkill')
+      .sort({ createdAt: -1 });
+    res.json(swaps);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// GET /api/swaps/all (complete swap history)
+const getAllMySwaps = async (req, res) => {
+  try {
+    const swaps = await SwapRequest.find({
+      $or: [{ fromUser: req.user._id }, { toUser: req.user._id }],
+    })
+      .populate('fromUser toUser', 'name profilePicUrl isVerified trustScore rating')
       .populate('offeredSkill requestedSkill')
       .sort({ createdAt: -1 });
     res.json(swaps);
@@ -104,4 +123,31 @@ const declineSwap = async (req, res) => {
   }
 };
 
-module.exports = { createSwapRequest, getIncoming, getSent, getActive, acceptSwap, declineSwap };
+// PUT /api/swaps/:id/cancel
+const cancelSwap = async (req, res) => {
+  try {
+    const swap = await SwapRequest.findOne({
+      _id: req.params.id,
+      $or: [{ fromUser: req.user._id }, { toUser: req.user._id }],
+    });
+    if (!swap) return res.status(404).json({ message: 'Swap request not found' });
+    swap.status = 'cancelled';
+    await swap.save();
+    const otherUser = swap.fromUser.toString() === req.user._id.toString() ? swap.toUser : swap.fromUser;
+    await createNotification(otherUser, 'swap_cancelled', `${req.user.name} cancelled the swap`, swap._id);
+    res.json(swap);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = {
+  createSwapRequest,
+  getIncoming,
+  getSent,
+  getActive,
+  getAllMySwaps,
+  acceptSwap,
+  declineSwap,
+  cancelSwap,
+};

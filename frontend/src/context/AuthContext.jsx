@@ -9,7 +9,16 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const stored = localStorage.getItem('user');
-    if (stored) setUser(JSON.parse(stored));
+    const token = localStorage.getItem('token');
+    if (stored && token) {
+      setUser(JSON.parse(stored));
+      // Refresh current profile data in background
+      api.get('/auth/me').then(({ data }) => {
+        const merged = { ...JSON.parse(stored), ...data };
+        localStorage.setItem('user', JSON.stringify(merged));
+        setUser(merged);
+      }).catch(() => {});
+    }
     setLoading(false);
   }, []);
 
@@ -23,10 +32,29 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (payload) => {
     const { data } = await api.post('/auth/register', payload);
+    return data;
+  };
+
+  const verifyOtp = async (email, otp) => {
+    const { data } = await api.post('/auth/verify-otp', { email, otp });
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data));
     setUser(data);
     return data;
+  };
+
+  const verifyLoginOtp = async (email, otp) => {
+    const { data } = await api.post('/auth/verify-login-otp', { email, otp });
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data));
+    setUser(data);
+    return data;
+  };
+
+  const setAuthUser = (userData) => {
+    localStorage.setItem('token', userData.token);
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
   };
 
   const logout = () => {
@@ -35,10 +63,6 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  // Merges new fields (e.g. after editing bio, or uploading a profile
-  // picture) into the current user object, in both React state and
-  // localStorage, so the navbar avatar and other places update immediately
-  // without needing a full page refresh or re-login.
   const updateUserLocal = (updates) => {
     setUser((prev) => {
       const next = { ...prev, ...updates };
@@ -48,7 +72,19 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading, updateUserLocal }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        register,
+        verifyOtp,
+        verifyLoginOtp,
+        setAuthUser,
+        logout,
+        loading,
+        updateUserLocal,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

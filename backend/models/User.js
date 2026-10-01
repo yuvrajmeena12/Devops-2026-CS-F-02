@@ -3,25 +3,39 @@ const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    name: { type: String, required: true, trim: true, maxlength: 100 },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true, index: true },
     password: { type: String, required: true, minlength: 6 },
-    bio: { type: String, default: '' },
-    location: { type: String, default: '' },
+    phone: { type: String, default: '', index: true },
+    bio: { type: String, default: '', maxlength: 500 },
+    about: { type: String, default: '', maxlength: 2000 },
+    qualification: { type: String, default: '', maxlength: 200 },
+    hobbies: { type: String, default: '', maxlength: 300 },
+    awards: { type: String, default: '', maxlength: 500 },
+    location: { type: String, default: '', maxlength: 120 },
     profilePicUrl: { type: String, default: '' },
-    // Optional links shown on the public profile so a potential swap
-    // partner can look someone up before agreeing to meet — genuinely
-    // useful for trust, on top of the in-app rating system.
-    linkedinUrl: { type: String, default: '' },
-    instagramUrl: { type: String, default: '' },
-    websiteUrl: { type: String, default: '' },
+    linkedinUrl: { type: String, default: '', maxlength: 300 },
+    instagramUrl: { type: String, default: '', maxlength: 300 },
+    websiteUrl: { type: String, default: '', maxlength: 300 },
+    
+    // SkillSwap Verified Badge: Earned strictly through completed and rated interactions (threshold >= 5)
+    isVerified: { type: Boolean, default: false, index: true },
     trustScore: { type: Number, default: 0 },
-    completedSwapsCount: { type: Number, default: 0 },
-    role: { type: String, enum: ['user', 'admin'], default: 'user' },
-    isBanned: { type: Boolean, default: false },
-    // Password reset — we store a hashed version of the token (never the
-    // raw token) so that even if the database were exposed, the tokens
-    // themselves couldn't be used to reset anyone's password.
+    rating: { type: Number, default: 0 },
+    ratingCount: { type: Number, default: 0 },
+    completedSwapsCount: { type: Number, default: 0, index: true },
+    
+    // Account verification via OTP
+    isEmailVerified: { type: Boolean, default: false },
+    otp: { type: String, default: undefined },
+    otpExpire: { type: Date, default: undefined },
+    otpAttempts: { type: Number, default: 0 },
+    otpCooldown: { type: Date, default: undefined },
+
+    role: { type: String, enum: ['user', 'admin'], default: 'user', index: true },
+    isBanned: { type: Boolean, default: false, index: true },
+
+    // Password reset tokens
     resetPasswordToken: { type: String, default: undefined },
     resetPasswordExpire: { type: Date, default: undefined },
   },

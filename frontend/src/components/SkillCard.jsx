@@ -16,27 +16,38 @@ export default function SkillCard({ skill, actions }) {
   };
 
   return (
-    <div className="ticket">
-      <div className="ticket-eyebrow">{CATEGORY_ICON[skill.category] || '✨'} {skill.category} · {skill.level}</div>
-      <div className="ticket-title" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        {skill.title}
-        {skill.isVerified && (
-          <span style={{ fontSize: 10, fontWeight: 700, background: 'var(--teal)', color: 'var(--paper)', padding: '2px 8px', borderRadius: 10 }}>
-            ✓ VERIFIED
-          </span>
-        )}
-      </div>
-      {skill.description && <p style={{ fontSize: 13, color: 'var(--paper-muted)', marginBottom: 8 }}>{skill.description}</p>}
-      <div className="ticket-divider" />
-      <div className="ticket-row" style={{ flexWrap: 'wrap', gap: 8 }}>
-        <div style={{ fontSize: 12, color: 'var(--paper-muted)' }}>
-          {skill.user ? `By ${skill.user.name}${skill.user.trustScore ? ` · ★ ${skill.user.trustScore}` : ''}` : skill.mode}
+    <div className="ticket skill-card-explore">
+      <div className="ticket-body">
+        <div className="ticket-eyebrow">
+          {CATEGORY_ICON[skill.category] || '✨'} {skill.category} · {skill.level}
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="ticket-title">
+          <span className="ticket-title-text">{skill.title}</span>
           {skill.isVerified && (
-            <button className="btn btn-sm btn-outline" onClick={viewCertificate}  >View Certificate</button>
+            <span className="ticket-badge-verified">
+              ✓ VERIFIED
+            </span>
           )}
-          {actions}
+        </div>
+        <p className="ticket-desc">
+          {skill.description || ''}
+        </p>
+      </div>
+
+      <div className="ticket-footer">
+        <div className="ticket-divider" />
+        <div className="ticket-row">
+          <div className="ticket-author" title={skill.user ? `By ${skill.user.name}` : skill.mode}>
+            {skill.user ? `By ${skill.user.name}${skill.user.trustScore ? ` · ★ ${skill.user.trustScore}` : ''}` : skill.mode}
+          </div>
+          <div className="ticket-actions">
+            {skill.isVerified && (
+              <button className="btn btn-sm btn-outline ticket-action" onClick={viewCertificate}>
+                View Certificate
+              </button>
+            )}
+            {actions}
+          </div>
         </div>
       </div>
     </div>
