@@ -5,10 +5,6 @@ import StarRating from '../components/StarRating';
 import RequestSwapModal from '../components/RequestSwapModal';
 import { useAuth } from '../context/AuthContext';
 
-const CATEGORY_ICON = {
-  Tech: '💻', Music: '🎸', Language: '🗣️', Fitness: '🏋️', Art: '🎨', Cooking: '🍳', Academic: '📚', Other: '✨',
-};
-
 export default function Profile() {
   const { id } = useParams();
   const { user: currentUser } = useAuth();
@@ -134,84 +130,47 @@ export default function Profile() {
 
       <div className="two-col">
         <div>
-          <h3 style={{ marginBottom: 12, fontSize: 15, color: 'var(--teal)' }}>Can Teach</h3>
+          <h3 style={{ marginBottom: 10, fontSize: 15, color: 'var(--teal)' }}>Can Teach</h3>
           {teach.length === 0 && (
-            <div className="empty-state fade-in" style={{ padding: 24, minHeight: 154 }}>
+            <div className="empty-state fade-in" style={{ padding: 24 }}>
               <p style={{ fontSize: 13 }}>Nothing listed yet.</p>
             </div>
           )}
           {teach.map((s, i) => (
             <div key={s._id} className="ticket skill-ticket stagger-item" style={{ '--stagger-index': i }}>
-              <div className="ticket-body">
-                <div className="ticket-eyebrow">
-                  {CATEGORY_ICON[s.category] || '✨'} {s.category} · {s.level}
-                </div>
-                <div className="ticket-title">
-                  <span className="ticket-title-text">{s.title}</span>
-                  {s.isVerified && (
-                    <span className="ticket-badge-verified">
-                      ✓ VERIFIED
-                    </span>
-                  )}
-                </div>
-                <p className="ticket-desc">
-                  {s.description || ''}
-                </p>
+              <div className="ticket-title" style={{ fontSize: 15, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                {s.title}
+                {s.isVerified && (
+                  <span style={{ fontSize: 10, fontWeight: 700, background: 'var(--teal)', color: 'var(--paper)', padding: '2px 8px', borderRadius: 10 }}>
+                    ✓ VERIFIED
+                  </span>
+                )}
               </div>
-              <div className="ticket-footer">
-                <div className="ticket-divider" />
-                <div className="ticket-row">
-                  <div>
-                    {s.isVerified ? (
-                      <button className="btn btn-sm btn-outline ticket-action" onClick={() => viewCertificate(s._id)}>
-                        View Certificate
-                      </button>
-                    ) : (
-                      <span style={{ fontSize: 12, color: 'var(--paper-muted)' }}>Offered Skill</span>
-                    )}
-                  </div>
-                  <div>
-                    {!isOwnProfile && (
-                      <button className="btn btn-sm btn-teal" onClick={() => setSwapSkill(s)}>Request Swap</button>
-                    )}
-                  </div>
-                </div>
+              <div className="ticket-meta">{s.category} · {s.level}</div>
+              <div className="ticket-divider" />
+              <div className="ticket-row">
+                {s.isVerified ? (
+                  <button className="btn btn-sm btn-outline ticket-action" onClick={() => viewCertificate(s._id)}>View Certificate</button>
+                ) : <span></span>}
+                {!isOwnProfile && (
+                  <button className="btn btn-sm" onClick={() => setSwapSkill(s)}>Request Swap</button>
+                )}
               </div>
             </div>
           ))}
         </div>
 
         <div>
-          <h3 style={{ marginBottom: 12, fontSize: 15, color: 'var(--amber)' }}>Wants to Learn</h3>
+          <h3 style={{ marginBottom: 10, fontSize: 15, color: 'var(--amber)' }}>Wants to Learn</h3>
           {want.length === 0 && (
-            <div className="empty-state fade-in" style={{ padding: 24, minHeight: 154 }}>
+            <div className="empty-state fade-in" style={{ padding: 24 }}>
               <p style={{ fontSize: 13 }}>Nothing listed yet.</p>
             </div>
           )}
           {want.map((s, i) => (
             <div key={s._id} className="ticket skill-ticket stagger-item" style={{ '--stagger-index': i }}>
-              <div className="ticket-body">
-                <div className="ticket-eyebrow">
-                  {CATEGORY_ICON[s.category] || '✨'} {s.category} · {s.level}
-                </div>
-                <div className="ticket-title">
-                  <span className="ticket-title-text">{s.title}</span>
-                </div>
-                <p className="ticket-desc">
-                  {s.description || ''}
-                </p>
-              </div>
-              <div className="ticket-footer">
-                <div className="ticket-divider" />
-                <div className="ticket-row">
-                  <span style={{ fontSize: 12, color: 'var(--paper-muted)' }}>Learning Goal</span>
-                  <div>
-                    {!isOwnProfile && (
-                      <button className="btn btn-sm" onClick={() => setSwapSkill(s)}>Teach This</button>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <div className="ticket-title" style={{ fontSize: 15 }}>{s.title}</div>
+              <div className="ticket-meta">{s.category} · {s.level}</div>
             </div>
           ))}
         </div>

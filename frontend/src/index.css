@@ -105,17 +105,7 @@ h1 { font-size: clamp(2rem, 4vw, 3.35rem); } h2 { font-size: clamp(1.65rem, 3vw,
   background: linear-gradient(145deg, rgba(31,43,73,.9), rgba(18,27,50,.94)); border-radius: var(--radius); padding: clamp(20px, 3vw, 28px);
   margin-bottom: 20px; border: 1px solid rgba(213,223,255,.12); box-shadow: 0 16px 45px rgba(0,0,0,.16);
 }
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 20px;
-  align-items: stretch;
-}
-.grid > .stagger-item {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
 
 /* Signature element: the "trade ticket" — used for skill & swap listings.
    Perforated left edge + dashed divider evokes a ticket stub being torn/exchanged. */
@@ -130,169 +120,19 @@ h1 { font-size: clamp(2rem, 4vw, 3.35rem); } h2 { font-size: clamp(1.65rem, 3vw,
   background-size: 14px 16px; background-repeat: repeat-y;
 }
 .ticket-eyebrow {
-  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--paper-muted); margin-bottom: 6px;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--paper-muted); margin-bottom: 4px;
 }
 .ticket-title { font-family: var(--font-display); font-size: 17px; font-weight: 600; margin-bottom: 6px; }
 .ticket-meta { font-size: 12px; color: var(--paper-muted); margin-bottom: 8px; }
 .ticket-divider {
-  border-top: 1.5px dashed var(--paper-muted); opacity: 0.35; margin: 12px 0;
+  border-top: 1.5px dashed var(--paper-muted); opacity: 0.4; margin: 12px 0;
 }
-.ticket-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ticket-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 .ticket-exchange {
   display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600;
 }
 .ticket-exchange .arrow { color: var(--amber-dark); font-size: 16px; }
-
-/* Uniform explore skill card styling */
-.skill-card-explore {
-  height: 100%;
-  min-height: 216px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  margin-bottom: 0;
-  box-sizing: border-box;
-}
-.skill-card-explore .ticket-body {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-}
-.skill-card-explore .ticket-eyebrow {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 6px;
-}
-.skill-card-explore .ticket-title {
-  font-size: 16.5px;
-  line-height: 1.28;
-  min-height: 44px;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 6px;
-}
-.skill-card-explore .ticket-title-text {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.ticket-badge-verified {
-  font-size: 10px;
-  font-weight: 700;
-  background: var(--teal);
-  color: #0b1a24;
-  padding: 2px 7px;
-  border-radius: 10px;
-  white-space: nowrap;
-  display: inline-flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-.skill-card-explore .ticket-desc {
-  font-size: 12.5px;
-  color: var(--paper-muted);
-  line-height: 1.45;
-  min-height: 38px;
-  max-height: 38px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin-bottom: 6px;
-}
-.skill-card-explore .ticket-footer {
-  margin-top: auto;
-  flex-shrink: 0;
-}
-.skill-card-explore .ticket-divider {
-  margin: 10px 0 12px 0;
-}
-.skill-card-explore .ticket-row {
-  min-height: 32px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-}
-.skill-card-explore .ticket-author {
-  font-size: 12px;
-  color: var(--paper-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 140px;
-}
-.skill-card-explore .ticket-actions {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-/* Uniform profile skill card styling */
-.skill-ticket {
-  min-height: 154px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  margin-bottom: 14px;
-  box-sizing: border-box;
-}
-.skill-ticket .ticket-body {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-}
-.skill-ticket .ticket-eyebrow {
-  margin-bottom: 4px;
-}
-.skill-ticket .ticket-title {
-  font-size: 16px;
-  line-height: 1.25;
-  min-height: 24px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 4px;
-}
-.skill-ticket .ticket-title-text {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.skill-ticket .ticket-desc {
-  font-size: 12px;
-  color: var(--paper-muted);
-  line-height: 1.4;
-  min-height: 18px;
-  max-height: 34px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin-bottom: 2px;
-}
-.skill-ticket .ticket-footer {
-  margin-top: auto;
-  flex-shrink: 0;
-}
-.skill-ticket .ticket-divider {
-  margin: 10px 0 12px 0;
-}
-.skill-ticket .ticket-row {
-  min-height: 32px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-}
 
 /* ===== Forms ===== */
 label { display: block; margin-bottom: 6px; font-size: 13px; color: var(--ink-muted); font-weight: 500; }
@@ -339,7 +179,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--amber); outline:
 .empty-state {
   text-align: center; padding: 32px 20px; color: var(--ink-muted);
   background: var(--ink-raised); border-radius: var(--radius);
-  min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center;
   border: 1px dashed rgba(237,232,216,0.12);
 }
 .empty-state .icon { font-size: 32px; margin-bottom: 10px; }
@@ -348,94 +188,20 @@ input:focus, textarea:focus, select:focus { border-color: var(--amber); outline:
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
 /* Profile: a single responsive composition, shared by public and edit flows. */
-.profile-hero {
-  overflow: hidden;
-  margin-bottom: 28px;
-  border-radius: calc(var(--radius) + 4px);
-  background: linear-gradient(145deg, rgba(37,50,86,.98), rgba(18,27,50,.98));
-  border: 1px solid rgba(213,223,255,.15);
-  box-shadow: 0 20px 50px rgba(0,0,0,.22);
-}
-.profile-cover {
-  height: 136px;
-  background: linear-gradient(105deg, var(--violet), #5865c9 44%, var(--teal));
-  position: relative;
-}
-.profile-cover::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 80% 0, rgba(255,255,255,.35), transparent 30%), linear-gradient(120deg, transparent 30%, rgba(255,255,255,.12));
-}
-.profile-summary {
-  display: flex;
-  align-items: flex-end;
-  gap: 20px;
-  flex-wrap: wrap;
-  padding: 0 clamp(20px, 4vw, 32px) 18px;
-  margin-top: 0;
-  position: relative;
-}
-.profile-avatar {
-  width: 104px;
-  height: 104px;
-  border-radius: 50%;
-  flex: 0 0 auto;
-  overflow: hidden;
-  background: linear-gradient(135deg, var(--amber), var(--teal));
-  color: var(--ink);
-  border: 4px solid #1c2747;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 36px;
-  box-shadow: 0 10px 25px rgba(0,0,0,.35);
-  margin-top: -52px;
-  position: relative;
-  z-index: 2;
-}
+.profile-hero { overflow: hidden; margin-bottom: 28px; border-radius: calc(var(--radius) + 4px); background: linear-gradient(145deg, rgba(37,50,86,.98), rgba(18,27,50,.98)); border: 1px solid rgba(213,223,255,.15); box-shadow: 0 20px 50px rgba(0,0,0,.22); }
+.profile-cover { height: 118px; background: linear-gradient(105deg, var(--violet), #5865c9 44%, var(--teal)); position: relative; }
+.profile-cover::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 80% 0, rgba(255,255,255,.35), transparent 30%), linear-gradient(120deg, transparent 30%, rgba(255,255,255,.12)); }
+.profile-summary { display: flex; align-items: flex-end; gap: 20px; flex-wrap: wrap; padding: 0 clamp(20px, 4vw, 32px) 20px; margin-top: -48px; }
+.profile-avatar { width: 104px; height: 104px; border-radius: 50%; flex: 0 0 auto; overflow: hidden; background: linear-gradient(135deg, var(--amber), var(--teal)); color: var(--ink); border: 4px solid #1b2746; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 36px; box-shadow: 0 10px 25px rgba(0,0,0,.35); }
 .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.profile-title {
-  flex: 1;
-  min-width: 180px;
-  padding-top: 14px;
-  padding-bottom: 2px;
-}
-.profile-title h1 {
-  margin-bottom: 4px;
-  font-size: clamp(1.75rem, 4vw, 2.45rem);
-  line-height: 1.18;
-}
-.profile-title p {
-  color: var(--ink-muted);
-  font-size: .9rem;
-}
-.profile-summary .btn {
-  margin-bottom: 6px;
-}
-.profile-details {
-  padding: 0 clamp(20px, 4vw, 32px) 28px;
-}
-.profile-bio {
-  max-width: 780px;
-  font-size: .95rem;
-  line-height: 1.7;
-  margin-bottom: 18px;
-  color: #dbe3fa;
-}
+.profile-title { flex: 1; min-width: 180px; padding-bottom: 4px; }
+.profile-title h1 { margin-bottom: 4px; font-size: clamp(1.75rem, 4vw, 2.45rem); }
+.profile-title p { color: var(--ink-muted); font-size: .9rem; }
+.profile-details { padding: 0 clamp(20px, 4vw, 32px) 28px; }
+.profile-bio { max-width: 780px; font-size: .95rem; line-height: 1.7; margin-bottom: 18px; color: #dbe3fa; }
 .profile-stats, .profile-links { display: flex; gap: 10px; flex-wrap: wrap; }
 .profile-stats { margin-bottom: 14px; }
-.ticket-action {
-  color: #14203c !important;
-  border-color: rgba(20,32,60,.35) !important;
-  background: rgba(20,32,60,.04) !important;
-  font-weight: 600;
-}
-.ticket-action:hover {
-  background: rgba(20,32,60,.12) !important;
-  border-color: rgba(20,32,60,.5) !important;
-}
+.ticket-action { color: var(--paper-text); border-color: rgba(20,32,60,.35); }
 
 /* ===== Animations & transitions ===== */
 @keyframes fadeInUp {
