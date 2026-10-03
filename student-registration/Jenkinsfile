@@ -1,0 +1,65 @@
+pipeline {
+
+    agent any
+
+    environment {
+        IMAGE_NAME = "student-registration"
+        CONTAINER_NAME = "student-registration-container"
+    }
+
+    stages {
+
+        stage("Checkout") {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage("Install Dependencies") {
+            steps {
+                dir("student-registration") {
+                    bat "npm install"
+                }
+            }
+        }
+
+        stage("Docker Build") {
+            steps {
+                dir("student-registration") {
+                    bat "docker build -t %IMAGE_NAME% ."
+                }
+            }
+        }
+
+        stage("Stop Old Container") {
+            steps {
+                bat "docker stop %CONTAINER_NAME% || exit /b 0"
+                bat "docker rm %CONTAINER_NAME% || exit /b 0"
+            }
+        }
+
+        stage("Run Container") {
+            steps {
+                bat "docker run -d --name %CONTAINER_NAME% -p 3001:3001 %IMAGE_NAME%"
+            }
+        }
+
+        stage("Health Check") {
+            steps {
+                bat "timeout /t 5"
+                bat "curl.exe http://localhost:3001/api/health"
+            }
+        }
+    }
+
+    post {
+
+        success {
+            echo "Student Registration deployment successful!"
+        }
+
+        failure {
+            echo "Student Registration deployment failed."
+        }
+    }
+}

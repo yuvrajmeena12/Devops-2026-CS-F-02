@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "name": "Allisa Goyal",
+    "email": "b241035@skit.ac.in",
+    "phone": "8599565555",
+    "dob": "2000-12-12",
+    "gender": "Male",
+    "college": "SKIT",
+    "course": "B.Tech CSE",
+    "year": "3rd Year",
+    "rollNumber": "24ESKCS780",
+    "address": "jaipur",
+    "registeredAt": "2026-10-03T20:35:09.700Z"
+  }
+]

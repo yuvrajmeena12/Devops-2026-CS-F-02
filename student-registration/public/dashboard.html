@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard | StudentHub</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<nav class="navbar">
+
+    <div class="logo">StudentHub</div>
+
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="register.html">Register</a>
+        <a href="dashboard.html">Dashboard</a>
+    </div>
+
+</nav>
+
+<main class="dashboard">
+
+    <div class="dashboard-header">
+
+        <div>
+            <span class="badge">ADMIN DASHBOARD</span>
+
+            <h1>Student Dashboard</h1>
+
+            <p>
+                View and manage all registered students.
+            </p>
+        </div>
+
+        <a href="register.html" class="btn primary">
+            + Register Student
+        </a>
+
+    </div>
+
+    <section class="stats">
+
+        <div class="stat-card">
+            <span>Total Students</span>
+            <strong id="totalStudents">0</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Storage</span>
+            <strong>JSON</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>System</span>
+            <strong id="systemStatus">Online</strong>
+        </div>
+
+    </section>
+
+    <section class="students-section">
+
+        <div class="section-header">
+
+            <h2>Registered Students</h2>
+
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search student..."
+            >
+
+        </div>
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>College</th>
+                        <th>Course</th>
+                        <th>Year</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody id="studentTableBody">
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div id="emptyState" class="empty-state">
+            No students registered yet.
+        </div>
+
+    </section>
+
+</main>
+
+<footer>
+    StudentHub © 2026 | Student Registration System
+</footer>
+
+<script src="dashboard.js"></script>
+
+</body>
+</html>
