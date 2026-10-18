@@ -3,10 +3,47 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import SkillAutocomplete from '../components/SkillAutocomplete';
 
-const CATEGORIES = ['Tech', 'Music', 'Language', 'Fitness', 'Art', 'Cooking', 'Academic', 'Other'];
-const LEVELS = ['Beginner', 'Intermediate', 'Expert'];
+const CATEGORIES = [
+  'Programming',
+  'Web Development',
+  'Data & AI',
+  'Design',
+  'Video & Photography',
+  'Music',
+  'Languages',
+  'Business',
+  'Marketing',
+  'Writing',
+  'Science & Math',
+  'Cooking',
+  'Fitness & Wellness',
+  'Public Speaking',
+  'Other',
+];
+const LEVELS = ['Beginner', 'Intermediate', 'Advanced', 'Expert'];
 const MODES = ['online', 'in-person', 'both'];
-const CATEGORY_ICON = { Tech: '💻', Music: '🎸', Language: '🗣️', Fitness: '🏋️', Art: '🎨', Cooking: '🍳', Academic: '📚', Other: '✨' };
+const CATEGORY_ICON = {
+  Programming: '💻',
+  'Web Development': '🌐',
+  'Data & AI': '🤖',
+  Design: '🎨',
+  'Video & Photography': '📷',
+  Music: '🎸',
+  Languages: '🗣️',
+  Business: '💼',
+  Marketing: '📈',
+  Writing: '✍️',
+  'Science & Math': '🔬',
+  Cooking: '🍳',
+  'Fitness & Wellness': '🏋️',
+  'Public Speaking': '🎤',
+  Other: '✨',
+  Tech: '💻',
+  Language: '🗣️',
+  Fitness: '🏋️',
+  Art: '🎨',
+  Academic: '📚',
+};
 
 function VerifiedBadge() {
   return (

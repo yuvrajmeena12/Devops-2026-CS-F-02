@@ -11,10 +11,16 @@ export const AuthProvider = ({ children }) => {
     const stored = localStorage.getItem('user');
     const token = localStorage.getItem('token');
     if (stored && token) {
-      setUser(JSON.parse(stored));
+      try {
+        setUser(JSON.parse(stored));
+      } catch (e) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+      }
       // Refresh current profile data in background
       api.get('/auth/me').then(({ data }) => {
-        const merged = { ...JSON.parse(stored), ...data };
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const merged = { ...currentUser, ...data };
         localStorage.setItem('user', JSON.stringify(merged));
         setUser(merged);
       }).catch(() => {});
@@ -24,35 +30,28 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const { data } = await api.post('/auth/login', { email, password });
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data));
-    setUser(data);
+    if (data.token) {
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data));
+      setUser(data);
+    }
     return data;
   };
 
   const register = async (payload) => {
     const { data } = await api.post('/auth/register', payload);
-    return data;
-  };
-
-  const verifyOtp = async (email, otp) => {
-    const { data } = await api.post('/auth/verify-otp', { email, otp });
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data));
-    setUser(data);
-    return data;
-  };
-
-  const verifyLoginOtp = async (email, otp) => {
-    const { data } = await api.post('/auth/verify-login-otp', { email, otp });
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data));
-    setUser(data);
+    if (data.token) {
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data));
+      setUser(data);
+    }
     return data;
   };
 
   const setAuthUser = (userData) => {
-    localStorage.setItem('token', userData.token);
+    if (userData.token) {
+      localStorage.setItem('token', userData.token);
+    }
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
   };
@@ -77,8 +76,6 @@ export const AuthProvider = ({ children }) => {
         user,
         login,
         register,
-        verifyOtp,
-        verifyLoginOtp,
         setAuthUser,
         logout,
         loading,

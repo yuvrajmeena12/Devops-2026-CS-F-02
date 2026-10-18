@@ -1,33 +1,21 @@
 const rateLimit = require('express-rate-limit');
 
-// Authentication endpoints limiter (login, register, OTP verification)
+// Authentication endpoints limiter (login, register, password changes)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // 20 attempts per window
+  max: 50,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
     success: false,
-    message: 'Too many authentication attempts from this IP address. Please try again in 15 minutes.',
-  },
-});
-
-// Sensitive OTP creation/resend limiter (stricter to prevent SMS/Email exhaustion)
-const otpLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 6, // 6 OTP requests per 10 minutes per IP
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    success: false,
-    message: 'Too many OTP requests from this network. Please wait before requesting another code.',
+    message: 'Too many authentication attempts from this IP address. Please try again later.',
   },
 });
 
 // General public read and search endpoints limiter
 const publicApiLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 120, // 120 requests per minute
+  max: 120,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -36,8 +24,33 @@ const publicApiLimiter = rateLimit({
   },
 });
 
+// Search & Match queries limiter
+const searchLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Search query rate limit exceeded. Please wait a moment.',
+  },
+});
+
+// Direct message send rate limiter (60 messages per minute)
+const messageLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Message rate limit exceeded. You can send at most 60 messages per minute.',
+  },
+});
+
 module.exports = {
   authLimiter,
-  otpLimiter,
   publicApiLimiter,
+  searchLimiter,
+  messageLimiter,
 };

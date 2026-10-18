@@ -3,10 +3,10 @@ const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true, maxlength: 100 },
+    name: { type: String, required: true, trim: true, maxlength: 60 },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true, index: true },
     password: { type: String, required: true, minlength: 6 },
-    phone: { type: String, default: '', index: true },
+    phone: { type: String, default: '', trim: true, maxlength: 20 },
     bio: { type: String, default: '', maxlength: 500 },
     about: { type: String, default: '', maxlength: 2000 },
     qualification: { type: String, default: '', maxlength: 200 },
@@ -14,35 +14,51 @@ const userSchema = new mongoose.Schema(
     awards: { type: String, default: '', maxlength: 500 },
     location: { type: String, default: '', maxlength: 120 },
     profilePicUrl: { type: String, default: '' },
+    avatar: {
+      file: { type: String, default: null },
+      mime: { type: String, default: null },
+    },
     linkedinUrl: { type: String, default: '', maxlength: 300 },
     instagramUrl: { type: String, default: '', maxlength: 300 },
     websiteUrl: { type: String, default: '', maxlength: 300 },
-    
-    // SkillSwap Verified Badge: Earned strictly through completed and rated interactions (threshold >= 5)
+
+    // SkillSwap Verified Badge: Earned strictly through completed and rated exchanges (threshold >= 5, rating >= 3.5)
     isVerified: { type: Boolean, default: false, index: true },
+    verified: { type: Boolean, default: false },
+    verifiedAt: { type: Date, default: null },
     trustScore: { type: Number, default: 0 },
     rating: { type: Number, default: 0 },
+    ratingAvg: { type: Number, default: 0 },
     ratingCount: { type: Number, default: 0 },
     completedSwapsCount: { type: Number, default: 0, index: true },
-    
-    // Account verification via OTP
-    isEmailVerified: { type: Boolean, default: false },
-    otp: { type: String, default: undefined },
-    otpExpire: { type: Date, default: undefined },
-    otpAttempts: { type: Number, default: 0 },
-    otpCooldown: { type: Date, default: undefined },
+    completedSwaps: { type: Number, default: 0 },
+
+    // Non-OTP Authentication & Session Security
+    tokenVersion: { type: Number, default: 0 },
+    failedLogins: { type: Number, default: 0 },
+    lockUntil: { type: Date, default: null },
+    isEmailVerified: { type: Boolean, default: true },
+    emailVerified: { type: Boolean, default: true },
 
     role: { type: String, enum: ['user', 'admin'], default: 'user', index: true },
     isBanned: { type: Boolean, default: false, index: true },
 
-    // Password reset tokens
+    // Cryptographic Token Password Recovery (Non-OTP)
     resetPasswordToken: { type: String, default: undefined },
     resetPasswordExpire: { type: Date, default: undefined },
   },
   { timestamps: true }
 );
 
+// Synchronize aliases on save
 userSchema.pre('save', async function (next) {
+  if (this.isModified('isVerified')) this.verified = this.isVerified;
+  if (this.isModified('verified')) this.isVerified = this.verified;
+  if (this.isModified('rating')) this.ratingAvg = this.rating;
+  if (this.isModified('ratingAvg')) this.rating = this.ratingAvg;
+  if (this.isModified('completedSwapsCount')) this.completedSwaps = this.completedSwapsCount;
+  if (this.isModified('completedSwaps')) this.completedSwapsCount = this.completedSwaps;
+
   if (!this.isModified('password')) return next();
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);

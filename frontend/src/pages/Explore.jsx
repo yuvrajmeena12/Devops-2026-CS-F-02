@@ -4,7 +4,24 @@ import api from '../api/axios';
 import SkillCard from '../components/SkillCard';
 import RequestSwapModal from '../components/RequestSwapModal';
 
-const CATEGORIES = ['', 'Tech', 'Music', 'Language', 'Fitness', 'Art', 'Cooking', 'Academic', 'Other'];
+const CATEGORIES = [
+  '',
+  'Programming',
+  'Web Development',
+  'Data & AI',
+  'Design',
+  'Video & Photography',
+  'Music',
+  'Languages',
+  'Business',
+  'Marketing',
+  'Writing',
+  'Science & Math',
+  'Cooking',
+  'Fitness & Wellness',
+  'Public Speaking',
+  'Other',
+];
 
 export default function Explore() {
   const [skills, setSkills] = useState([]);

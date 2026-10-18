@@ -3,55 +3,48 @@ const router = express.Router();
 const multer = require('multer');
 const {
   register,
-  verifyOtp,
-  resendOtp,
   login,
-  sendLoginOtp,
-  verifyLoginOtp,
-  forgotPasswordOtp,
-  resetPasswordWithOtp,
   getMe,
   updateProfile,
+  changePassword,
+  logout,
+  forgotPassword,
+  resetPassword,
   getUserPublicProfile,
   uploadProfilePicture,
   removeProfilePicture,
 } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
-const { authLimiter, otpLimiter } = require('../middleware/rateLimiter');
+const { authLimiter } = require('../middleware/rateLimiter');
 const {
   validate,
   registerValidation,
   loginValidation,
-  otpVerifyValidation,
+  changePasswordValidation,
 } = require('../middleware/validators');
 
-// Enhanced file filter checking magic header bytes
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
-  fileFilter: (req, file, cb) => {
-    const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
-    if (allowed.includes(file.mimetype.toLowerCase())) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only PNG, JPG, or WEBP images are permitted'));
-    }
-  },
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
 });
 
+// Non-OTP Authentication Endpoints
 router.post('/register', authLimiter, validate(registerValidation), register);
-router.post('/verify-otp', authLimiter, validate(otpVerifyValidation), verifyOtp);
-router.post('/resend-otp', otpLimiter, resendOtp);
 router.post('/login', authLimiter, validate(loginValidation), login);
-router.post('/send-login-otp', otpLimiter, sendLoginOtp);
-router.post('/verify-login-otp', authLimiter, verifyLoginOtp);
-router.post('/forgot-password-otp', otpLimiter, forgotPasswordOtp);
-router.post('/reset-password-otp', authLimiter, resetPasswordWithOtp);
+router.post('/forgot-password', authLimiter, forgotPassword);
+router.put('/reset-password/:token', authLimiter, resetPassword);
+router.post('/reset-password/:token', authLimiter, resetPassword);
+router.post('/change-password', protect, authLimiter, validate(changePasswordValidation), changePassword);
+router.put('/change-password', protect, authLimiter, validate(changePasswordValidation), changePassword);
+router.post('/logout', protect, logout);
 
+// Profile Management
 router.get('/me', protect, getMe);
 router.put('/me', protect, updateProfile);
 router.post('/me/profile-picture', protect, upload.single('profilePic'), uploadProfilePicture);
+router.post('/me/avatar', protect, upload.single('avatar'), uploadProfilePicture);
 router.delete('/me/profile-picture', protect, removeProfilePicture);
+router.delete('/me/avatar', protect, removeProfilePicture);
 router.get('/user/:id', getUserPublicProfile);
 
 module.exports = router;

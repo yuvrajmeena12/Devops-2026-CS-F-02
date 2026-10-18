@@ -1,9 +1,16 @@
-const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const { generateOTP, sendOtpEmail } = require('../utils/otpHelper');
+const { sniff, saveUpload } = require('../utils/upload');
+const { recomputeReputation } = require('../utils/reputation');
 
-const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET || 'fallback_secret_key', { expiresIn: '30d' });
+const generateToken = (id, tokenVersion = 0) => {
+  return jwt.sign(
+    { id, tokenVersion },
+    process.env.JWT_SECRET || 'skillswapsecret2026xyz123',
+    { expiresIn: '30d' }
+  );
+};
 
 const normalizeUrl = (url) => {
   if (!url) return '';
@@ -13,439 +20,408 @@ const normalizeUrl = (url) => {
   return `https://${trimmed}`;
 };
 
-// POST /api/auth/register
+// POST /api/auth/register (OTP EXCLUDED)
 const register = async (req, res) => {
   try {
     const { name, email, phone, password, confirmPassword, location, bio } = req.body;
 
-    // 1. Mandatory Field Validations
     if (!name || !name.trim()) {
-      return res.status(400).json({ message: 'Full name is mandatory' });
+      return res.status(400).json({ success: false, message: 'Full name is mandatory' });
     }
     if (!email || !email.trim()) {
-      return res.status(400).json({ message: 'Email address is mandatory' });
-    }
-    if (!phone || !phone.trim()) {
-      return res.status(400).json({ message: 'Mobile number is mandatory for account security and verification' });
+      return res.status(400).json({ success: false, message: 'Email address is mandatory' });
     }
     if (!password) {
-      return res.status(400).json({ message: 'Password is mandatory' });
+      return res.status(400).json({ success: false, message: 'Password is mandatory' });
     }
-    if (!confirmPassword) {
-      return res.status(400).json({ message: 'Please confirm your password' });
+    if (confirmPassword && password !== confirmPassword) {
+      return res.status(400).json({ success: false, message: 'Passwords do not match' });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters long' });
     }
 
-    // 2. Format Validations
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
-      return res.status(400).json({ message: 'Please provide a valid email address' });
+      return res.status(400).json({ success: false, message: 'Please provide a valid email address' });
     }
 
-    // Mobile number validation: accept 10-15 digits (e.g. +91 9876543210 or 9876543210)
-    const cleanedPhone = phone.trim().replace(/[\s-]/g, '');
-    const phoneRegex = /^[+]?[0-9]{10,15}$/;
-    if (!phoneRegex.test(cleanedPhone)) {
-      return res.status(400).json({ message: 'Please provide a valid 10 to 15 digit mobile number' });
+    const cleanedEmail = email.toLowerCase().trim();
+    const existingUser = await User.findOne({ email: cleanedEmail });
+    if (existingUser) {
+      return res.status(409).json({ success: false, message: 'An account with this email address already exists' });
     }
 
-    if (password.length < 6) {
-      return res.status(400).json({ message: 'Password must be at least 6 characters long' });
-    }
-
-    if (password !== confirmPassword) {
-      return res.status(400).json({ message: 'Passwords do not match' });
-    }
-
-    // 3. Duplicate Account Prevention
-    const existingUser = await User.findOne({
-      $or: [{ email: email.toLowerCase().trim() }, { phone: cleanedPhone }],
+    // Direct active account registration without OTP
+    const user = await User.create({
+      name: name.trim(),
+      email: cleanedEmail,
+      password,
+      phone: phone ? phone.trim() : '',
+      location: location ? location.trim() : '',
+      bio: bio ? bio.trim() : '',
+      isEmailVerified: true,
+      emailVerified: true,
+      tokenVersion: 0,
+      failedLogins: 0,
     });
 
-    if (existingUser && existingUser.isEmailVerified) {
-      if (existingUser.email === email.toLowerCase().trim()) {
-        return res.status(400).json({ message: 'An account with this email address already exists' });
-      }
-      if (existingUser.phone === cleanedPhone) {
-        return res.status(400).json({ message: 'An account with this mobile number already exists' });
-      }
-    }
+    const token = generateToken(user._id, user.tokenVersion);
 
-    const otp = generateOTP();
-    const otpExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-    const otpCooldown = new Date(Date.now() + 60 * 1000); // 1 minute cooldown
-
-    let user;
-    if (existingUser && !existingUser.isEmailVerified) {
-      existingUser.name = name.trim();
-      existingUser.email = email.toLowerCase().trim();
-      existingUser.password = password;
-      existingUser.phone = cleanedPhone;
-      existingUser.location = location ? location.trim() : existingUser.location;
-      existingUser.bio = bio ? bio.trim() : existingUser.bio;
-      existingUser.otp = otp;
-      existingUser.otpExpire = otpExpire;
-      existingUser.otpAttempts = 0;
-      existingUser.otpCooldown = otpCooldown;
-      user = await existingUser.save();
-    } else {
-      user = await User.create({
-        name: name.trim(),
-        email: email.toLowerCase().trim(),
-        password,
-        phone: cleanedPhone,
-        location: location ? location.trim() : '',
-        bio: bio ? bio.trim() : '',
-        otp,
-        otpExpire,
-        otpAttempts: 0,
-        otpCooldown,
-        isEmailVerified: false,
-      });
-    }
-
-    const emailSent = await sendOtpEmail(user.email, otp, 'Account Registration & Mobile Verification');
-
-    res.status(201).json({
-      message: 'Verification OTP sent successfully',
-      email: user.email,
-      phone: user.phone,
-      requiresOtp: true,
-      devOtp: !emailSent ? otp : undefined,
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// POST /api/auth/verify-otp
-const verifyOtp = async (req, res) => {
-  try {
-    const { email, otp } = req.body;
-    if (!email || !otp) {
-      return res.status(400).json({ message: 'Email and OTP are required' });
-    }
-
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    if (!user.otp || !user.otpExpire) {
-      return res.status(400).json({ message: 'No active OTP request found. Please request a new OTP.' });
-    }
-
-    if (new Date() > user.otpExpire) {
-      return res.status(400).json({ message: 'OTP has expired. Please request a new one.' });
-    }
-
-    if (user.otpAttempts >= 5) {
-      return res.status(429).json({ message: 'Too many failed attempts. Please request a new OTP.' });
-    }
-
-    if (user.otp !== otp.trim()) {
-      user.otpAttempts += 1;
-      await user.save();
-      return res.status(400).json({ message: 'Invalid OTP code' });
-    }
-
-    // OTP verified successfully
-    user.isEmailVerified = true;
-    user.otp = undefined;
-    user.otpExpire = undefined;
-    user.otpAttempts = 0;
-    user.otpCooldown = undefined;
-    await user.save();
-
-    res.json({
+    const safeUser = {
       _id: user._id,
+      id: user._id,
       name: user.name,
       email: user.email,
       phone: user.phone,
-      isVerified: user.isVerified,
+      bio: user.bio,
+      location: user.location,
       role: user.role,
+      isVerified: user.isVerified,
+      verified: user.isVerified,
+      rating: user.rating,
+      ratingAvg: user.ratingAvg,
+      ratingCount: user.ratingCount,
+      completedSwapsCount: user.completedSwapsCount,
       profilePicUrl: user.profilePicUrl,
-      token: generateToken(user._id),
-      message: 'Account verified successfully',
+    };
+
+    res.status(201).json({
+      success: true,
+      message: 'Account created successfully',
+      token,
+      user: safeUser,
+      ...safeUser,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// POST /api/auth/resend-otp
-const resendOtp = async (req, res) => {
-  try {
-    const { email, purpose = 'Verification' } = req.body;
-    if (!email) return res.status(400).json({ message: 'Email is required' });
-
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) return res.status(404).json({ message: 'User not found' });
-
-    if (user.otpCooldown && new Date() < user.otpCooldown) {
-      const remainingSec = Math.ceil((user.otpCooldown - new Date()) / 1000);
-      return res.status(429).json({ message: `Please wait ${remainingSec}s before requesting another code.` });
-    }
-
-    const otp = generateOTP();
-    user.otp = otp;
-    user.otpExpire = new Date(Date.now() + 10 * 60 * 1000);
-    user.otpAttempts = 0;
-    user.otpCooldown = new Date(Date.now() + 60 * 1000);
-    await user.save();
-
-    const emailSent = await sendOtpEmail(user.email, otp, purpose);
-
-    res.json({
-      message: 'A new OTP has been sent',
-      devOtp: !emailSent ? otp : undefined,
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// POST /api/auth/login
+// POST /api/auth/login (With Brute-force exponential lockout & tokenVersion)
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required' });
+      return res.status(400).json({ success: false, message: 'Email and password are required' });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (user && (await user.matchPassword(password))) {
-      if (user.isBanned) return res.status(403).json({ message: 'This account has been suspended' });
-      
-      // If user registered before email verification was enforced or has verified
-      return res.json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        isVerified: user.isVerified,
-        role: user.role,
-        profilePicUrl: user.profilePicUrl,
-        token: generateToken(user._id),
+    const cleanedEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ email: cleanedEmail });
+
+    // Check account lockout
+    if (user && user.lockUntil && user.lockUntil > new Date()) {
+      const waitMinutes = Math.ceil((user.lockUntil - new Date()) / (60 * 1000));
+      return res.status(429).json({
+        success: false,
+        message: `Account is temporarily locked due to consecutive failed attempts. Please try again in ${waitMinutes} minute(s).`,
       });
     }
 
-    res.status(401).json({ message: 'Invalid email or password' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// POST /api/auth/send-login-otp
-const sendLoginOtp = async (req, res) => {
-  try {
-    const { identifier } = req.body; // email or phone
-    if (!identifier) return res.status(400).json({ message: 'Email or phone number is required' });
-
-    const user = await User.findOne({
-      $or: [{ email: identifier.toLowerCase() }, { phone: identifier }],
-    });
-
-    if (!user) {
-      return res.status(404).json({ message: 'No registered user found with that email/phone' });
+    if (!user || !(await user.matchPassword(password))) {
+      if (user) {
+        user.failedLogins = (user.failedLogins || 0) + 1;
+        if (user.failedLogins >= 5) {
+          user.lockUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 min lockout
+        }
+        await user.save();
+      }
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
 
-    if (user.isBanned) return res.status(403).json({ message: 'This account has been suspended' });
-
-    if (user.otpCooldown && new Date() < user.otpCooldown) {
-      const remainingSec = Math.ceil((user.otpCooldown - new Date()) / 1000);
-      return res.status(429).json({ message: `Please wait ${remainingSec}s before requesting another code.` });
+    if (user.isBanned) {
+      return res.status(403).json({ success: false, message: 'This account has been suspended' });
     }
 
-    const otp = generateOTP();
-    user.otp = otp;
-    user.otpExpire = new Date(Date.now() + 10 * 60 * 1000);
-    user.otpAttempts = 0;
-    user.otpCooldown = new Date(Date.now() + 60 * 1000);
-    await user.save();
-
-    const emailSent = await sendOtpEmail(user.email, otp, 'Login Authentication');
-
-    res.json({
-      message: `OTP sent to ${user.email}`,
-      email: user.email,
-      devOtp: !emailSent ? otp : undefined,
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// POST /api/auth/verify-login-otp
-const verifyLoginOtp = async (req, res) => {
-  try {
-    const { email, otp } = req.body;
-    if (!email || !otp) return res.status(400).json({ message: 'Email and OTP are required' });
-
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) return res.status(404).json({ message: 'User not found' });
-
-    if (!user.otp || !user.otpExpire) {
-      return res.status(400).json({ message: 'No active OTP login session. Please request a new OTP.' });
-    }
-
-    if (new Date() > user.otpExpire) {
-      return res.status(400).json({ message: 'OTP has expired. Please request a new code.' });
-    }
-
-    if (user.otp !== otp.trim()) {
-      user.otpAttempts += 1;
+    // Reset login failures on success
+    if (user.failedLogins > 0 || user.lockUntil) {
+      user.failedLogins = 0;
+      user.lockUntil = null;
       await user.save();
-      return res.status(400).json({ message: 'Invalid OTP code' });
     }
 
-    user.otp = undefined;
-    user.otpExpire = undefined;
-    user.otpAttempts = 0;
-    user.otpCooldown = undefined;
-    user.isEmailVerified = true;
-    await user.save();
+    const token = generateToken(user._id, user.tokenVersion || 0);
 
-    res.json({
+    const safeUser = {
       _id: user._id,
+      id: user._id,
       name: user.name,
       email: user.email,
       phone: user.phone,
-      isVerified: user.isVerified,
+      bio: user.bio,
+      about: user.about,
+      qualification: user.qualification,
+      hobbies: user.hobbies,
+      awards: user.awards,
+      location: user.location,
       role: user.role,
+      isVerified: user.isVerified,
+      verified: user.isVerified,
+      rating: user.rating,
+      ratingAvg: user.ratingAvg,
+      ratingCount: user.ratingCount,
+      completedSwapsCount: user.completedSwapsCount,
       profilePicUrl: user.profilePicUrl,
-      token: generateToken(user._id),
-      message: 'Logged in successfully',
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// POST /api/auth/forgot-password-otp
-const forgotPasswordOtp = async (req, res) => {
-  try {
-    const { identifier } = req.body; // email or phone
-    if (!identifier) return res.status(400).json({ message: 'Email or phone number is required' });
-
-    const user = await User.findOne({
-      $or: [{ email: identifier.toLowerCase() }, { phone: identifier }],
-    });
-
-    if (!user) {
-      return res.json({ message: 'If an account exists, a verification code has been generated.' });
-    }
-
-    const otp = generateOTP();
-    user.otp = otp;
-    user.otpExpire = new Date(Date.now() + 10 * 60 * 1000);
-    user.otpAttempts = 0;
-    user.otpCooldown = new Date(Date.now() + 60 * 1000);
-    await user.save();
-
-    const emailSent = await sendOtpEmail(user.email, otp, 'Password Reset');
+    };
 
     res.json({
-      message: 'Password reset OTP has been sent',
-      email: user.email,
-      devOtp: !emailSent ? otp : undefined,
+      success: true,
+      token,
+      user: safeUser,
+      ...safeUser,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// POST /api/auth/reset-password-otp
-const resetPasswordWithOtp = async (req, res) => {
-  try {
-    const { email, otp, password } = req.body;
-    if (!email || !otp || !password) {
-      return res.status(400).json({ message: 'Email, OTP, and new password are required' });
-    }
-
-    if (password.length < 6) {
-      return res.status(400).json({ message: 'Password must be at least 6 characters long' });
-    }
-
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) return res.status(404).json({ message: 'User not found' });
-
-    if (!user.otp || !user.otpExpire || new Date() > user.otpExpire) {
-      return res.status(400).json({ message: 'OTP is invalid or expired. Please request a new one.' });
-    }
-
-    if (user.otp !== otp.trim()) {
-      user.otpAttempts += 1;
-      await user.save();
-      return res.status(400).json({ message: 'Invalid OTP code' });
-    }
-
-    user.password = password; // pre-save hook hashes this
-    user.otp = undefined;
-    user.otpExpire = undefined;
-    user.otpAttempts = 0;
-    user.otpCooldown = undefined;
-    await user.save();
-
-    res.json({ message: 'Password has been reset successfully. You can now log in.' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
 // GET /api/auth/me
-const getMe = async (req, res) => res.json(req.user);
+const getMe = async (req, res) => {
+  res.json({
+    user: req.user,
+    ...req.user.toObject(),
+  });
+};
 
-// PUT /api/auth/me
+// PUT /api/auth/me & PUT /api/users/me
 const updateProfile = async (req, res) => {
   try {
-    const { name, bio, about, qualification, hobbies, awards, phone, location, profilePicUrl, linkedinUrl, instagramUrl, websiteUrl } = req.body;
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    const {
+      name,
+      phone,
+      bio,
+      about,
+      qualification,
+      hobbies,
+      awards,
+      location,
+      linkedinUrl,
+      instagramUrl,
+      websiteUrl,
+      profilePicUrl,
+    } = req.body;
 
-    if (name) user.name = name;
-    if (phone !== undefined) user.phone = phone;
-    if (bio !== undefined) user.bio = bio;
-    if (about !== undefined) user.about = about;
-    if (qualification !== undefined) user.qualification = qualification;
-    if (hobbies !== undefined) user.hobbies = hobbies;
-    if (awards !== undefined) user.awards = awards;
-    if (location !== undefined) user.location = location;
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    // Explicit field allowlist only
+    if (name) user.name = name.trim();
+    if (phone !== undefined) user.phone = phone.trim();
+    if (bio !== undefined) user.bio = bio.trim();
+    if (about !== undefined) user.about = about.trim();
+    if (qualification !== undefined) user.qualification = qualification.trim();
+    if (hobbies !== undefined) user.hobbies = Array.isArray(hobbies) ? hobbies.join(', ') : hobbies;
+    if (awards !== undefined) user.awards = Array.isArray(awards) ? awards.join(', ') : awards;
+    if (location !== undefined) user.location = location.trim();
     if (profilePicUrl !== undefined) user.profilePicUrl = profilePicUrl;
     if (linkedinUrl !== undefined) user.linkedinUrl = normalizeUrl(linkedinUrl);
     if (instagramUrl !== undefined) user.instagramUrl = normalizeUrl(instagramUrl);
     if (websiteUrl !== undefined) user.websiteUrl = normalizeUrl(websiteUrl);
 
     await user.save();
-    res.json(user);
+    res.json({
+      success: true,
+      user,
+      ...user.toObject(),
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// GET /api/auth/user/:id (public profile)
+// POST /api/auth/change-password (Authenticated with Session Revocation)
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Current and new passwords are required' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: 'New password must be at least 6 characters long' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const matches = await user.matchPassword(currentPassword);
+    if (!matches) {
+      return res.status(400).json({ success: false, message: 'Current password is incorrect' });
+    }
+
+    user.password = newPassword; // Hashed by pre-save hook
+    user.tokenVersion = (user.tokenVersion || 0) + 1; // Invalidate all prior issued tokens
+    await user.save();
+
+    const freshToken = generateToken(user._id, user.tokenVersion);
+    res.json({
+      success: true,
+      message: 'Password changed successfully',
+      token: freshToken,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// POST /api/auth/logout
+const logout = async (req, res) => {
+  res.json({ success: true, message: 'Signed out successfully' });
+};
+
+// POST /api/auth/forgot-password (Cryptographic Token without OTP)
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email address is required' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!user) {
+      return res.json({
+        success: true,
+        message: 'If that email is registered, a password reset link has been dispatched.',
+      });
+    }
+
+    // Generate random 32-byte hex token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpire = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+    await user.save();
+
+    const clientUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',')[0].trim() : 'http://localhost:5173';
+    const resetLink = `${clientUrl}/reset-password/${resetToken}`;
+
+    res.json({
+      success: true,
+      message: 'If that email is registered, a password reset link has been dispatched.',
+      devResetLink: resetLink,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// PUT /api/auth/reset-password/:token (Redeem token without OTP)
+const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    if (!password || password.length < 6) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters long' });
+    }
+
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: 'This password reset link is invalid or has expired' });
+    }
+
+    user.password = password; // Pre-save hook hashes it
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    user.tokenVersion = (user.tokenVersion || 0) + 1; // Invalidate all prior sessions
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password has been reset successfully. You can now log in with your new password.',
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// GET /api/auth/user/:id & GET /api/users/:id (Public profile view)
 const getUserPublicProfile = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select(
-      '-password -otp -otpExpire -otpCooldown -resetPasswordToken -resetPasswordExpire'
+      '-password -tokenVersion -failedLogins -lockUntil -resetPasswordToken -resetPasswordExpire'
     );
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    res.json(user);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Member profile not found' });
+    }
+
+    // Auto-recalculate reputation in background to ensure freshness
+    recomputeReputation(user._id).catch(() => {});
+
+    const profile = {
+      _id: user._id,
+      id: user._id,
+      name: user.name,
+      bio: user.bio,
+      about: user.about,
+      qualification: user.qualification,
+      hobbies: user.hobbies,
+      awards: user.awards,
+      location: user.location,
+      profilePicUrl: user.profilePicUrl,
+      linkedinUrl: user.linkedinUrl,
+      instagramUrl: user.instagramUrl,
+      websiteUrl: user.websiteUrl,
+      isVerified: user.isVerified,
+      verified: user.isVerified,
+      trustScore: user.trustScore || user.rating || 0,
+      rating: user.rating || 0,
+      ratingAvg: user.ratingAvg || user.rating || 0,
+      ratingCount: user.ratingCount || 0,
+      completedSwapsCount: user.completedSwapsCount || 0,
+      completedSwaps: user.completedSwaps || user.completedSwapsCount || 0,
+      createdAt: user.createdAt,
+    };
+
+    res.json({
+      profile,
+      ...profile,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// POST /api/auth/me/profile-picture
+// POST /api/auth/me/profile-picture (Avatar upload with magic-byte validation)
 const uploadProfilePicture = async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No image file uploaded' });
+    }
+
+    // Inspect genuine binary magic header bytes
+    const detected = sniff(req.file.buffer);
+    if (!detected || !['png', 'jpg', 'webp'].includes(detected.ext)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid image format. Allowed formats: PNG, JPG, or WEBP.',
+      });
+    }
+
     const base64 = req.file.buffer.toString('base64');
+    const dataUri = `data:${detected.mime};base64,${base64}`;
+
     const user = await User.findById(req.user._id);
-    user.profilePicUrl = `data:${req.file.mimetype};base64,${base64}`;
+    user.profilePicUrl = dataUri;
+    user.avatar = {
+      file: `avatar_${user._id}.${detected.ext}`,
+      mime: detected.mime,
+    };
     await user.save();
-    res.json(user);
+
+    res.json({
+      success: true,
+      message: 'Profile picture updated successfully',
+      user,
+      ...user.toObject(),
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -454,24 +430,28 @@ const removeProfilePicture = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     user.profilePicUrl = '';
+    user.avatar = { file: null, mime: null };
     await user.save();
-    res.json(user);
+    res.json({
+      success: true,
+      message: 'Profile picture removed successfully',
+      user,
+      ...user.toObject(),
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
 module.exports = {
   register,
-  verifyOtp,
-  resendOtp,
   login,
-  sendLoginOtp,
-  verifyLoginOtp,
-  forgotPasswordOtp,
-  resetPasswordWithOtp,
   getMe,
   updateProfile,
+  changePassword,
+  logout,
+  forgotPassword,
+  resetPassword,
   getUserPublicProfile,
   uploadProfilePicture,
   removeProfilePicture,

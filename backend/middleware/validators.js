@@ -1,4 +1,5 @@
 const { body, validationResult } = require('express-validator');
+const { CATEGORIES, LEVELS } = require('../utils/constants');
 
 // Middleware to evaluate validation chains and return standardized errors
 const validate = (validations) => {
@@ -25,27 +26,19 @@ const registerValidation = [
   body('name')
     .trim()
     .notEmpty().withMessage('Full name is mandatory')
-    .isLength({ min: 2, max: 80 }).withMessage('Name must be between 2 and 80 characters'),
+    .isLength({ min: 2, max: 60 }).withMessage('Name must be between 2 and 60 characters'),
   body('email')
     .trim()
     .notEmpty().withMessage('Email address is mandatory')
     .isEmail().withMessage('Please provide a valid email address')
     .normalizeEmail(),
-  body('phone')
-    .trim()
-    .notEmpty().withMessage('Mobile number is mandatory for account security and verification')
-    .matches(/^[+]?[0-9]{10,15}$/).withMessage('Please provide a valid 10 to 15 digit mobile number'),
   body('password')
     .notEmpty().withMessage('Password is mandatory')
     .isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
-  body('confirmPassword')
-    .notEmpty().withMessage('Please confirm your password')
-    .custom((val, { req }) => {
-      if (val !== req.body.password) {
-        throw new Error('Passwords do not match');
-      }
-      return true;
-    }),
+  body('phone')
+    .optional({ checkFalsy: true })
+    .trim()
+    .matches(/^[+]?[0-9\s-]{7,15}$/).withMessage('Please provide a valid phone number'),
 ];
 
 const loginValidation = [
@@ -58,34 +51,38 @@ const loginValidation = [
     .notEmpty().withMessage('Password is required'),
 ];
 
-const otpVerifyValidation = [
-  body('email')
-    .trim()
-    .notEmpty().withMessage('Email is required')
-    .isEmail().withMessage('Please provide a valid email address')
-    .normalizeEmail(),
-  body('otp')
-    .trim()
-    .notEmpty().withMessage('OTP code is required')
-    .isLength({ min: 6, max: 6 }).withMessage('OTP must be exactly 6 digits')
-    .isNumeric().withMessage('OTP must consist of numbers only'),
+const changePasswordValidation = [
+  body('currentPassword')
+    .notEmpty().withMessage('Current password is required'),
+  body('newPassword')
+    .notEmpty().withMessage('New password is required')
+    .isLength({ min: 6 }).withMessage('New password must be at least 6 characters long'),
 ];
 
 const skillValidation = [
   body('title')
+    .optional()
     .trim()
-    .notEmpty().withMessage('Skill title is required')
     .isLength({ min: 2, max: 120 }).withMessage('Title must be between 2 and 120 characters'),
+  body('name')
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 120 }).withMessage('Name must be between 2 and 120 characters'),
   body('type')
-    .isIn(['teach', 'want']).withMessage("Skill type must be 'teach' or 'want'"),
+    .optional()
+    .isIn(['teach', 'want', 'learn']).withMessage("Skill type must be 'teach' or 'learn'"),
   body('category')
     .optional()
-    .isIn(['Tech', 'Music', 'Language', 'Fitness', 'Art', 'Cooking', 'Academic', 'Other'])
-    .withMessage('Invalid skill category'),
+    .isIn(CATEGORIES).withMessage(`Invalid skill category. Must be one of: ${CATEGORIES.join(', ')}`),
   body('level')
     .optional()
-    .isIn(['Beginner', 'Intermediate', 'Expert'])
-    .withMessage('Invalid proficiency level'),
+    .custom((val) => {
+      const lower = String(val).toLowerCase();
+      if (!LEVELS.includes(lower)) {
+        throw new Error(`Invalid level. Allowed: ${LEVELS.join(', ')}`);
+      }
+      return true;
+    }),
   body('mode')
     .optional()
     .isIn(['online', 'in-person', 'both'])
@@ -94,42 +91,35 @@ const skillValidation = [
 
 const swapRequestValidation = [
   body('toUser')
-    .notEmpty().withMessage('Target user ID is required')
+    .optional()
     .isMongoId().withMessage('Invalid user identifier format'),
-  body('offeredSkill')
-    .notEmpty().withMessage('Offered skill is required')
-    .isMongoId().withMessage('Invalid offered skill identifier format'),
   body('requestedSkill')
-    .notEmpty().withMessage('Requested skill is required')
+    .optional()
     .isMongoId().withMessage('Invalid requested skill identifier format'),
 ];
 
 const sessionValidation = [
-  body('swapRequestId')
-    .notEmpty().withMessage('Swap request identifier is required')
-    .isMongoId().withMessage('Invalid swap request identifier'),
-  body('scheduledDateTime')
-    .notEmpty().withMessage('Scheduled date and time is required')
-    .isISO8601().withMessage('Please provide a valid date/time format'),
-  body('mode')
-    .isIn(['online', 'in-person']).withMessage("Session mode must be 'online' or 'in-person'"),
+  body('durationMinutes')
+    .optional()
+    .isInt({ min: 15, max: 480 }).withMessage('Duration must be between 15 and 480 minutes'),
+  body('meetingLink')
+    .optional({ checkFalsy: true })
+    .matches(/^https:\/\/[^\s]+$/i).withMessage('Meeting link must be a valid HTTPS URL'),
 ];
 
 const reviewValidation = [
-  body('sessionId')
-    .notEmpty().withMessage('Session identifier is required')
-    .isMongoId().withMessage('Invalid session identifier'),
-  body('revieweeId')
-    .notEmpty().withMessage('Reviewee identifier is required')
-    .isMongoId().withMessage('Invalid reviewee identifier'),
   body('rating')
     .isInt({ min: 1, max: 5 }).withMessage('Rating must be an integer between 1 and 5'),
 ];
 
 const messageValidation = [
   body('text')
+    .optional()
     .trim()
-    .notEmpty().withMessage('Message text is required')
+    .isLength({ max: 2000 }).withMessage('Message cannot exceed 2000 characters'),
+  body('content')
+    .optional()
+    .trim()
     .isLength({ max: 2000 }).withMessage('Message cannot exceed 2000 characters'),
 ];
 
@@ -137,7 +127,7 @@ module.exports = {
   validate,
   registerValidation,
   loginValidation,
-  otpVerifyValidation,
+  changePasswordValidation,
   skillValidation,
   swapRequestValidation,
   sessionValidation,

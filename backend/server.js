@@ -57,14 +57,22 @@ if (process.env.NODE_ENV !== 'test') {
 // Health check endpoint for Docker, Jenkins, and load balancers
 app.get('/api/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime(), timestamp: new Date() }));
 
+// Mount Public Overview Endpoints (Cached)
+const { overview } = require('./controllers/skillController');
+app.get('/api/public/overview', overview);
+app.get('/api/overview', overview);
+
 // Mount Application Routes
 app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/skills', require('./routes/skillRoutes'));
+app.use('/api/matches', require('./routes/matchRoutes'));
 app.use('/api/swaps', require('./routes/swapRoutes'));
 app.use('/api/sessions', require('./routes/sessionRoutes'));
 app.use('/api/reviews', require('./routes/reviewRoutes'));
 app.use('/api/messages', require('./routes/messageRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 
 // 404 Route Catch-All

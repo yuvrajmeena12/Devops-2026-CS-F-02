@@ -1,54 +1,93 @@
-// Curated skill suggestions per category, used to power the searchable
-// skill dropdown. Keeping everyone's spelling/casing consistent here is
-// what makes the matching algorithm actually find people reliably —
-// "React", "react.js", and "ReactJS" would never match each other as
-// free text, but they will if everyone picks the same option from this list.
-//
-// Users can still type something not on this list and add it as a custom
-// skill (see the "Add [x] as a new skill" option in SkillAutocomplete) —
-// this list is suggestions, not a restriction.
+// Curated skill suggestions per category, aligned with the 15 SkillSwap official categories.
+// Keeping spelling and casing consistent powers the deterministic matching algorithm.
 
 const skillOptions = {
-  Tech: [
-    'JavaScript', 'Python', 'Java', 'C++', 'C', 'React', 'Node.js', 'HTML & CSS',
-    'TypeScript', 'SQL', 'MongoDB', 'Git & GitHub', 'Machine Learning',
-    'Data Structures & Algorithms', 'Android Development', 'iOS Development',
-    'Cloud Computing (AWS)', 'Cybersecurity Basics', 'UI/UX Design', 'WordPress',
-    'Excel & Spreadsheets', 'PHP', 'Flutter', 'Docker', 'Data Analysis', 'Power BI',
+  Programming: [
+    'JavaScript', 'Python', 'Java', 'C++', 'C', 'TypeScript', 'SQL', 'MongoDB',
+    'Git & GitHub', 'Android Development', 'iOS Development', 'Flutter', 'Docker',
+    'Go', 'Rust', 'Linux & Bash', 'Data Structures & Algorithms',
+  ],
+  'Web Development': [
+    'React', 'Node.js', 'HTML & CSS', 'Next.js', 'Vue.js', 'TailwindCSS',
+    'Express.js', 'Full Stack Development', 'WordPress', 'GraphQL', 'REST APIs',
+  ],
+  'Data & AI': [
+    'Machine Learning', 'Deep Learning', 'Data Analysis', 'Power BI', 'Excel & Spreadsheets',
+    'Python for Data Science', 'TensorFlow', 'PyTorch', 'Data Visualization', 'BigQuery',
+  ],
+  Design: [
+    'UI/UX Design', 'Figma', 'Graphic Design', 'Sketching / Drawing', 'Painting',
+    'Digital Illustration', 'Animation', 'Typography', 'Logo Design', 'Adobe Photoshop',
+  ],
+  'Video & Photography': [
+    'Photography', 'Video Editing', 'Premiere Pro', 'After Effects', 'DaVinci Resolve',
+    'Cinematography', 'YouTube Production', 'Lighting & Color Grading',
   ],
   Music: [
     'Guitar', 'Piano', 'Vocals / Singing', 'Drums', 'Violin', 'Ukulele',
     'Music Production', 'Tabla', 'Flute', 'Music Theory', 'DJing', 'Songwriting',
     'Harmonium', 'Beatboxing',
   ],
-  Language: [
+  Languages: [
     'English', 'Spanish', 'French', 'German', 'Hindi', 'Japanese',
     'Mandarin Chinese', 'Korean', 'Sign Language', 'Sanskrit', 'Arabic', 'Italian',
     'Bengali', 'Tamil', 'Telugu', 'Marathi', 'Russian', 'Portuguese',
   ],
-  Fitness: [
-    'Yoga', 'Weightlifting / Strength Training', 'Running', 'Cricket Coaching',
-    'Football / Soccer', 'Badminton', 'Swimming', 'Martial Arts', 'Pilates',
-    'Cycling', 'Dance (Bollywood / Hip-Hop)', 'Meditation', 'Basketball',
-    'Table Tennis', 'Boxing',
+  Business: [
+    'Entrepreneurship', 'Project Management', 'Product Management', 'Startup Strategy',
+    'Financial Modeling', 'Sales & Negotiation', 'Accounting', 'Business Analytics',
   ],
-  Art: [
-    'Sketching / Drawing', 'Painting', 'Calligraphy', 'Photography',
-    'Graphic Design', 'Pottery', 'Digital Illustration', 'Sculpture', 'Origami',
-    'Henna / Mehendi Art', 'Video Editing', 'Animation',
+  Marketing: [
+    'Digital Marketing', 'SEO', 'Social Media Marketing', 'Content Marketing',
+    'Google Ads', 'Copywriting', 'Email Marketing', 'Brand Strategy',
+  ],
+  Writing: [
+    'Creative Writing', 'Essay Writing', 'Technical Writing', 'Copywriting',
+    'Storytelling', 'Blogging', 'Screenwriting', 'Research Papers',
+  ],
+  'Science & Math': [
+    'Mathematics', 'Calculus', 'Linear Algebra', 'Physics', 'Chemistry',
+    'Biology', 'Statistics', 'Research Methods',
   ],
   Cooking: [
     'Baking', 'Indian Cuisine', 'Italian Cuisine', 'Vegan Cooking',
     'Cake Decorating', 'Bartending / Mocktails', 'Street Food', 'Grilling & BBQ',
     'Chinese Cuisine', 'Meal Prepping',
   ],
-  Academic: [
-    'Mathematics', 'Physics', 'Chemistry', 'Biology', 'Public Speaking',
-    'Essay Writing', 'Resume Building', 'Interview Preparation',
-    'Competitive Exam Coaching', 'History', 'Economics', 'Accounting',
-    'Statistics', 'Research Methods',
+  'Fitness & Wellness': [
+    'Yoga', 'Weightlifting / Strength Training', 'Running', 'Cricket Coaching',
+    'Football / Soccer', 'Badminton', 'Swimming', 'Martial Arts', 'Pilates',
+    'Cycling', 'Dance (Bollywood / Hip-Hop)', 'Meditation', 'Boxing',
   ],
-  Other: [],
+  'Public Speaking': [
+    'Public Speaking', 'Toastmasters / Speech', 'Presentation Skills', 'Debate',
+    'Pitching & Demo Day', 'Voice Modulation', 'Interview Preparation',
+  ],
+  Other: [
+    'Chess', 'Life Coaching', 'Productivity & Habits', 'Personal Finance',
+  ],
+
+  // Backward compatibility aliases
+  Tech: [
+    'JavaScript', 'Python', 'Java', 'C++', 'React', 'Node.js', 'HTML & CSS',
+    'TypeScript', 'SQL', 'MongoDB', 'Git & GitHub', 'Machine Learning',
+  ],
+  Language: [
+    'English', 'Spanish', 'French', 'German', 'Hindi', 'Japanese',
+    'Mandarin Chinese', 'Korean',
+  ],
+  Fitness: [
+    'Yoga', 'Weightlifting / Strength Training', 'Running', 'Football / Soccer',
+    'Badminton', 'Swimming', 'Pilates', 'Meditation',
+  ],
+  Art: [
+    'Sketching / Drawing', 'Painting', 'Graphic Design', 'Photography',
+    'Digital Illustration', 'Animation',
+  ],
+  Academic: [
+    'Mathematics', 'Physics', 'Chemistry', 'Public Speaking', 'Essay Writing',
+    'Statistics',
+  ],
 };
 
 export default skillOptions;
