@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: skillswap
+  labels:
+    app.kubernetes.io/name: skillswap
+    app.kubernetes.io/part-of: skillswap-platform

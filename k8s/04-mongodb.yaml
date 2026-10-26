@@ -1,0 +1,103 @@
+# ==============================================================================
+# APPROACH A: Connect to Existing SkillSwap MongoDB (Preserves 100% Existing Data)
+# Kubernetes Service + Endpoints routing directly to existing MongoDB container
+# ==============================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+  namespace: skillswap
+  labels:
+    app: mongodb
+    app.kubernetes.io/name: mongodb-service
+    app.kubernetes.io/part-of: skillswap-platform
+spec:
+  ports:
+    - name: mongodb
+      port: 27017
+      targetPort: 27017
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: mongodb-service
+  namespace: skillswap
+subsets:
+  - addresses:
+      - ip: 172.23.0.5
+    ports:
+      - name: mongodb
+        port: 27017
+
+---
+# ==============================================================================
+# APPROACH B: Native Kubernetes In-Cluster MongoDB with Persistent Volume Claim
+# (Demonstrates Kubernetes Storage Architecture, PVC, and Local-Path Provisioner)
+# ==============================================================================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-pvc
+  namespace: skillswap
+  labels:
+    app: mongodb-k8s
+    app.kubernetes.io/name: mongodb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb-k8s-deployment
+  namespace: skillswap
+  labels:
+    app: mongodb-k8s
+    app.kubernetes.io/name: mongodb-k8s
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb-k8s
+  template:
+    metadata:
+      labels:
+        app: mongodb-k8s
+    spec:
+      containers:
+        - name: mongodb
+          image: mongo:8
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 27017
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: mongo-storage
+              mountPath: /data/db
+      volumes:
+        - name: mongo-storage
+          persistentVolumeClaim:
+            claimName: mongodb-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-cluster-service
+  namespace: skillswap
+  labels:
+    app: mongodb-k8s
+spec:
+  selector:
+    app: mongodb-k8s
+  ports:
+    - port: 27017
+      targetPort: 27017

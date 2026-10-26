@@ -11,9 +11,20 @@ node_modules/
 
 # Private keys and secrets
 *.pem
+auth_token.json
+k8s/02-secrets.yaml
+k8s/*secret.yaml
+
+# Docker image tar archives
+*.tar
 
 # Build files
 dist/
 **/dist/
 
 build-feedback.txt
+
+# Temp profiles
+edge_profile/
+edge_capture_profile/
+temp_profile/
