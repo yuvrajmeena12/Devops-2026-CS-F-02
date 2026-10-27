@@ -1,0 +1,34 @@
+{
+  "testStart": "2026-10-27T17:37:57.881Z",
+  "testEnd": "2026-10-27T17:38:43.111Z",
+  "durationSeconds": 45.23,
+  "concurrentUsers": 5,
+  "totalRequests": 975,
+  "successfulRequests": 975,
+  "failedRequests": 0,
+  "successRatePercent": 100,
+  "throughputRps": 21.56,
+  "latencyMs": {
+    "min": 2.6,
+    "mean": 6.49,
+    "p50": 4.82,
+    "p90": 7.66,
+    "p95": 20.78,
+    "p99": 34.85,
+    "max": 67.35
+  },
+  "endpointBreakdown": {
+    "frontend": {
+      "requests": 488,
+      "successRatePercent": 100,
+      "meanLatencyMs": 7.34,
+      "p95LatencyMs": 24.56
+    },
+    "backend_health": {
+      "requests": 487,
+      "successRatePercent": 100,
+      "meanLatencyMs": 5.65,
+      "p95LatencyMs": 12.74
+    }
+  }
+}

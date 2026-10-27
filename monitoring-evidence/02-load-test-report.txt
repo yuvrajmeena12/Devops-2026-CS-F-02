@@ -1,0 +1,32 @@
+===============================================================
+SkillSwap Performance Test Execution Report
+===============================================================
+Execution Window:   2026-10-27T17:37:57.881Z to 2026-10-27T17:38:43.111Z
+Duration:           45.23 seconds
+Concurrent Users:   5 Virtual Users (Gradual Ramp-Up)
+Total Requests:     975
+Success Rate:       100% (975/975)
+Failed Requests:    0
+Average Throughput: 21.56 requests/sec
+
+Latency Distribution (Overall):
+  Min Latency:      2.6 ms
+  Mean Latency:     6.49 ms
+  P50 (Median):     4.82 ms
+  P90:              7.66 ms
+  P95:              20.78 ms
+  P99:              34.85 ms
+  Max Latency:      67.35 ms
+
+Endpoint Breakdown:
+  - Frontend SPA (/):
+      Requests:     488
+      Success Rate: 100%
+      Mean Latency: 7.34 ms
+      P95 Latency:  24.56 ms
+  - Backend API (/api/health):
+      Requests:     487
+      Success Rate: 100%
+      Mean Latency: 5.65 ms
+      P95 Latency:  12.74 ms
+===============================================================

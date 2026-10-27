@@ -1,10 +1,10 @@
 pipeline {
     agent any
 
-    environment {
-        PATH = "C:/Users/GANPATI/AppData/Local/Programs/DockerDesktop/resources/bin;${env.PATH}"
-        KUBECONFIG = "C:/Users/GANPATI/.kube/config"
-    }
+   environment {
+   PATH = "C:/Users/GANPATI/AppData/Local/Programs/DockerDesktop/resources/bin;${env.PATH}"
+KUBECONFIG = "C:/Users/GANPATI/.kube/config"
+}
 
     stages {
         stage('Checkout') {

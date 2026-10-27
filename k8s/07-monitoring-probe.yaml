@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: skillswap-probes
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  interval: 10s
+  scrapeTimeout: 5s
+  module: http_2xx
+  prober:
+    url: blackbox-exporter-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+  targets:
+    staticConfig:
+      static:
+        - http://frontend-service.skillswap.svc.cluster.local:5173/
+        - http://backend-service.skillswap.svc.cluster.local:5000/api/health
+      labels:
+        project: skillswap
