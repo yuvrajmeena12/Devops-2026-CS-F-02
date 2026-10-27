@@ -2,11 +2,9 @@ pipeline {
     agent any
 
     environment {
-        // Ensure Docker and Kubectl executables and Docker Desktop kubeconfig are available in Jenkins Windows Service
-        PATH = "C:\\Users\\GANPATI\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;${env.PATH}"
-        KUBECONFIG = "C:\\Users\\GANPATI\\.kube\\config"
-    }
-
+    PATH = "C:/Users/GANPATI/AppData/Local/Programs/DockerDesktop/resources/bin;${env.PATH}"
+    KUBECONFIG = "C:/Users/GANPATI/.kube/config"
+}
     stages {
 
         stage('Checkout') {
